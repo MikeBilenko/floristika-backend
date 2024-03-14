@@ -1,0 +1,14 @@
+{% extends "account/email/base_message.txt" %}
+{% load account %}
+{% load i18n %}
+
+{% block content %}
+{% autoescape off %}{% user_display user as user_display %}
+{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
+Dear {{ user_display }},
+
+Verify your account to get access to all features using this link bellow:
+
+http://localhost:3000/accounts/verify/{{ key }}/
+
+{% endblocktrans %}{% endautoescape %}{% endblock content %}
