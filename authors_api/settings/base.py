@@ -12,6 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 APP_DIR = ROOT_DIR
 BASE_URL_PATH = os.getenv('DOMAIN')
+FRONTEND_URL_PATH = os.getenv('FRONTEND_URL')
 
 
 DEBUG = env.bool("DJANGO_DEBUG", False)
@@ -67,7 +68,10 @@ LOCAL_APPS = [
     'setup',
     'product',
     'reviews',
+    'discount',
     'orders',
+    'search',
+    'store',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -85,9 +89,6 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
-
-
 
 
 AUTHENTICATION_BACKENDS = [
@@ -235,7 +236,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "SIGNING_KEY": env("SIGNING_KEY"),

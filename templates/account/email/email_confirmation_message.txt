@@ -4,11 +4,11 @@
 
 {% block content %}
 {% autoescape off %}{% user_display user as user_display %}
-{% blocktrans with site_name=current_site.name site_domain=current_site.domain %}
+{% blocktrans with site_name=SITE_NAME site_domain=FRONTEND_URL_PATH %}
 Dear {{ user_display }},
 
 Verify your account to get access to all features using this link bellow:
 
-http://localhost:3000/accounts/verify/{{ key }}/
+{{ FRONTEND_URL_PATH }}/accounts/verify/{{ key }}/
 
 {% endblocktrans %}{% endautoescape %}{% endblock content %}

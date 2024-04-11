@@ -15,7 +15,7 @@ class ProductsHomePagination(pagination.PageNumberPagination):
 
 
 class ProductsPagination(pagination.PageNumberPagination):
-    page_size = 6
+    page_size = 16
     max_page_size = 1000
 
 
@@ -37,27 +37,42 @@ class ProductListApiView(generics.ListAPIView):
             subcategory = SubCategory.objects.filter(slug=subcategory_slug).first()
             queryset = queryset.filter(subcategory=subcategory)
 
-        colors = self.request.query_params.getlist('color')
+        colors = self.request.query_params.get('color')
         if colors:
-            queryset = queryset.filter(colors__in=Color.objects.filter(slug__in=colors))
+            colors = colors.split(',')
+            color_slugs = [color.lower() for color in colors]  # Convert colors to lowercase slugs
+            queryset = queryset.filter(Q(colors__slug__in=color_slugs) | Q(slug__in=color_slugs))
 
-        sizes = self.request.query_params.getlist('size')
+        sizes = self.request.query_params.get('size')
         if sizes:
-            queryset = queryset.filter(sizes__in=Size.objects.filter(slug__in=sizes))
+            sizes = sizes.split(',')
+            size_slugs = [size.lower() for size in sizes]  # Convert sizes to lowercase slugs
+            queryset = queryset.filter(sizes__in=Size.objects.filter(slug__in=size_slugs))
 
         price_from = self.request.query_params.get('price-from')
+        print(price_from,"PRICE FROM")
         price_to = self.request.query_params.get('price-to')
         if price_from and price_to:
             if bool(self.request.query_params.get("auth")):
                 queryset = queryset.filter(price_for_auth__range=(price_from, price_to))
             else:
                 queryset = queryset.filter(price__range=(price_from, price_to))
+        elif price_from and not price_to:
+            if bool(self.request.query_params.get("auth")):
+                queryset = queryset.filter(price_for_auth__gte=price_from)
+            else:
+                queryset = queryset.filter(price__gte=price_from)
+        elif not price_from and price_to:
+            if bool(self.request.query_params.get("auth")):
+                queryset = queryset.filter(price_for_auth__lte=price_to)
+            else:
+                queryset = queryset.filter(price__lte=price_to)
 
         sale = bool(self.request.query_params.get('sale'))
         if sale:
             queryset = queryset.filter(sale=True)
 
-        best_sellers = bool(self.request.query_params.get('best_sellers'))
+        best_sellers = bool(self.request.query_params.get('best-sellers'))
         if best_sellers:
             queryset = queryset.order_by('-sold')
 

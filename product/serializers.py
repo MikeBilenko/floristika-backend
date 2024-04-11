@@ -13,6 +13,8 @@ from text.serializers import TextSerializer
 from filters.serializers import ColorSerializer, SizeSerializer
 from category.serializers import CategorySerializer, SubCategorySerializer
 from reviews.models import Review
+from common.serializers import AuthPercentSerializer
+from common.models import AuthPercent
 
 
 class ProductDescriptionItemSerializer(serializers.ModelSerializer):
@@ -57,14 +59,19 @@ class ProductDeliverySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)
-    colors = ColorSerializer(many=True)
-    sizes = SizeSerializer(many=True)
+    color = ColorSerializer(many=False)
+    size = SizeSerializer(many=False)
     category = CategorySerializer(many=False)
     subcategory = SubCategorySerializer(many=False)
+    auth_percent = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = "__all__"
+
+    def get_auth_percent(self,obj):
+        serializer = AuthPercentSerializer(AuthPercent.objects.first())
+        return serializer.data
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -72,16 +79,22 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     description = ProductDescriptionSerializer(many=False)
     care = ProductCareInstructionSerializer(many=False)
     delivery = ProductDeliverySerializer(many=False)
-    colors = ColorSerializer(many=True)
-    sizes = SizeSerializer(many=True)
+    color = ColorSerializer(many=False)
+    size = SizeSerializer(many=False)
     category = CategorySerializer(many=False)
     subcategory = SubCategorySerializer(many=False)
     reviews = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
 
+    auth_percent = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = "__all__"
+
+    def get_auth_percent(self, obj):
+        serializer = AuthPercentSerializer(AuthPercent.objects.first())
+        return serializer.data
 
     def get_reviews(self,obj):
         reviews = len(Review.objects.filter(product=obj))

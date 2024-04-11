@@ -60,7 +60,6 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True, default='')
     price = models.FloatField(default=0.00)
-    price_for_auth = models.FloatField(editable=False, null=True, blank=True)
     sale_percent = models.FloatField(default=0.00, validators=[
         MaxValueValidator(100.00),
         MinValueValidator(0.00)
@@ -69,8 +68,8 @@ class Product(models.Model):
     qty = models.PositiveIntegerField(default=0)
     sold = models.PositiveIntegerField(default=0)
     images = models.ManyToManyField(Image, null=True, blank=True)
-    colors = models.ManyToManyField(Color, null=True, blank=True)
-    sizes = models.ManyToManyField(Size, null=True, blank=True)
+    color = models.ForeignKey(Color,on_delete=models.DO_NOTHING, null=True, blank=True)
+    size = models.ForeignKey(Size,on_delete=models.DO_NOTHING, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.DO_NOTHING, null=True, blank=True)
     rate = models.FloatField(default=0.00, validators=[
@@ -81,14 +80,7 @@ class Product(models.Model):
     care = models.ForeignKey(ProductCareInstruction, on_delete=models.DO_NOTHING,null=True, blank=True)
     delivery = models.ForeignKey(ProductDelivery, on_delete=models.DO_NOTHING, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
-    artiqule = models.CharField(max_length=150)
-
-    def save(self, *args, **kwargs):
-        if self.price is not None:
-            self.price_for_auth = self.price - self.price * 0.20
-        else:
-            self.price_for_auth = None
-        super(Product, self).save(*args, **kwargs)
+    vendor_code = models.CharField(max_length=150)
 
     def __str__(self):
         return self.name

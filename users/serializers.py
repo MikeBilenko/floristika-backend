@@ -3,8 +3,11 @@ from allauth.account.adapter import get_adapter
 from allauth.account.utils import setup_user_email
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import  AddressBook, WishList
+from .models import  AddressBook, WishList, Company
 from product.serializers import ProductSerializer
+from django_countries.serializers import CountryFieldMixin
+from phonenumber_field.serializerfields import PhoneNumberField
+
 
 
 User = get_user_model()
@@ -16,8 +19,8 @@ class AddressBookSerializer(serializers.ModelSerializer):
         model = AddressBook
 
 
-class UserSerializer(serializers.ModelSerializer):
-    address_books = AddressBookSerializer
+class UserSerializer(CountryFieldMixin, serializers.ModelSerializer):
+    address_books = AddressBookSerializer(many=True, required=False)
 
     class Meta:
         fields = [
@@ -29,7 +32,9 @@ class UserSerializer(serializers.ModelSerializer):
             "address",
             "city",
             "postal_code",
+            "country",
             "address_books",
+            "address_book_phone",
         ]
         model = User
 
@@ -42,13 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         address_books_data = validated_data.pop('address_books', [])
-        address_books = (instance.address_books).all()
-        address_books = list(address_books)
         instance = super(UserSerializer, self).update(instance, validated_data)
-
-        for address_book_data in address_books_data:
-            address_book = address_books.pop(0)
-            AddressBook.objects.update_or_create(user=instance, **address_book_data)
         return instance
 
     def to_representation(self, instance):
@@ -102,3 +101,9 @@ class WishListSerializers(serializers.ModelSerializer):
     class Meta:
         model = WishList
         fields = "__all__"
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = Company

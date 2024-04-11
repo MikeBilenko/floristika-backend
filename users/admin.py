@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 from .forms import UserCreationForm, UserChangeForm
-from .models import User, AddressBook, WishList
+from .models import User, AddressBook, WishList, Company
 
 # WishList
 
@@ -43,7 +43,7 @@ class UserAdmin(BaseUserAdmin):
         (
             _("More info"),
             {
-                "fields": ('phone', 'address', 'city', 'postal_code', 'address_books')
+                "fields": ('phone', 'address', 'city', 'postal_code', 'country', 'address_book_phone', 'address_books')
             },
         )
     )
@@ -70,3 +70,4 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(WishList)
 admin.site.register(AddressBook)
+admin.site.register(Company)
