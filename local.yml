@@ -12,8 +12,8 @@ services:
     expose:
       - "8000"
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     depends_on:
       - redis
       - postgres
@@ -30,7 +30,7 @@ services:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.production/.postgres
     networks:
       - authors-api
 
@@ -47,8 +47,8 @@ services:
     volumes:
       - .:/app
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     depends_on:
       - redis
       - postgres
@@ -63,8 +63,8 @@ services:
     volumes:
       - flower_data:/data
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.production/.django
+      - ./.envs/.production/.postgres
     ports:
       - "5555:5555"
     depends_on:

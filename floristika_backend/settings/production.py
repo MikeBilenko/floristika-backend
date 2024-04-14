@@ -5,5 +5,5 @@ ADMINS = [
     ("Mike Bilenko", "mike@codnity.com")
 ]
 
-#TODO: add domain names of production server
+#TODO: add domain names of .production server
 CSRF_TRUSTED_ORIGINS = [""]
