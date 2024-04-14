@@ -4,6 +4,7 @@ from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+from supersecret.admin import manager_admin_site
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -21,6 +22,7 @@ urlpatterns = [
     path('api/v1/accounts/', include('allauth.urls')),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0)),
     path(settings.ADMIN_URL, admin.site.urls),
+    path('manager-admin/', manager_admin_site.urls),
     path('api/v1/api-auth/', include('rest_framework.urls')),
     path("api/v1/setup/", include("setup.urls")),
     path("api/v1/products/", include('product.urls')),
@@ -32,7 +34,6 @@ urlpatterns = [
     path("api/v1/discounts/", include("discount.urls")),
     path("api/v1/orders/", include("orders.urls")),
     path("api/v1/search/", include("search.urls")),
-    path("api/v1/common/", include("common.urls")),
     path("api/v1/stores/", include("store.urls")),
 ]
 

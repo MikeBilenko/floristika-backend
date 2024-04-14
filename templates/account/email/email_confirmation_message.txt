@@ -1,6 +1,7 @@
 {% extends "account/email/base_message.txt" %}
 {% load account %}
 {% load i18n %}
+{% load static %}
 
 {% block content %}
 {% autoescape off %}{% user_display user as user_display %}
@@ -9,6 +10,6 @@ Dear {{ user_display }},
 
 Verify your account to get access to all features using this link bellow:
 
-{{ FRONTEND_URL_PATH }}/accounts/verify/{{ key }}/
+{{ FRONTEND_URL }}/accounts/verify/{{ key }}/
 
 {% endblocktrans %}{% endautoescape %}{% endblock content %}

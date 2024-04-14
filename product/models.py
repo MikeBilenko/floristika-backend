@@ -60,11 +60,11 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from='name', unique=True, default='')
     price = models.FloatField(default=0.00)
-    sale_percent = models.FloatField(default=0.00, validators=[
+    price_for_authenticated = models.FloatField(default=0.00, null=True, blank=True)
+    sale = models.FloatField(validators=[
         MaxValueValidator(100.00),
         MinValueValidator(0.00)
-    ])
-    sale = models.BooleanField(default=False)
+    ], null=True, blank=True)
     qty = models.PositiveIntegerField(default=0)
     sold = models.PositiveIntegerField(default=0)
     images = models.ManyToManyField(Image, null=True, blank=True)

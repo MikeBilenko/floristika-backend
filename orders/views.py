@@ -5,7 +5,6 @@ from django.template.loader import get_template
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from weasyprint import HTML
-from django.http import HttpResponseServerError
 from users.models import AddressBook, Company
 from .models import Order, Cart, Guest, OrderItem, Shipping, Billing,BankDetails
 from .serializers import OrderSerializer, CartSerializer
@@ -13,7 +12,6 @@ from product.models import Product
 import random
 from rest_framework import status
 from discount.models import Discount
-from common.models import AuthPercent
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime
 from store.models import Store
@@ -96,7 +94,6 @@ class OrderAPIView(APIView):
         number = generate_numeric_order_number()
         if self.request.user:
             cartItems = Cart.objects.filter(user=self.request.user)
-            auth_percent = AuthPercent.objects.first().percent
             cart_objs = []
             total = 0
             total_auth = 0
@@ -155,57 +152,59 @@ class OrderAPIView(APIView):
                 order_item = OrderItem.objects.create(
                     product=item.product,
                     quantity=item.quantity,
-                    user=self.request.user
+                    user=self.request.user,
+                    price=item.product.price,
+                    price_for_authenticated=item.product.price_for_authenticated,
+                    sale=item.product.sale,
                 )
                 product = Product.objects.get(pk=item.product.id)
                 product.qty -= item.quantity
                 product.sold += item.quantity
                 product.save()
-                price = item.product.price
+                price = item.product.price_for_authenticated
                 if item.product.sale:
-                    price = item.product.price - (item.product.price * item.product.sale_percent / 100)
-                price_auth = price - (price * auth_percent / 100)
+                    price = price - (price * item.product.sale / 100)
                 total += price * item.quantity
-                total_auth += price_auth * item.quantity
                 cart_objs.append(order_item)
                 item.delete()
+
+            company_total_auth = None
+            if company:
+                company_total_auth = total * company.sale_percent / 100
 
             order = Order.objects.create(
                 user=self.request.user,
                 company=company,
                 discount=discount,
                 total=total,
-                auth_percent=auth_percent,
-                total_auth=total_auth,
                 number=number,
                 shipping=shipping,
                 store=store,
                 billing=billing,
-                order_created=datetime.now()
+                order_created=datetime.now(),
+                company_total_auth=company_total_auth,
             )
             for cart_obj in cart_objs:
                 order.items.add(cart_obj)
             order.save()
             bank_details = BankDetails.objects.first()
-            #  12 October, 2023
-            given_datetime = datetime(2024, 4, 6, 12, 43)
-
-            # Format to keep only the date part
-            formatted_date = given_datetime.strftime('%B %d, %Y')
 
             new_items = []
 
             for cart_item in cart_objs:
                 product = cart_item.product
-
                 name = product.name
                 price = product.price
                 sale = product.sale
-                sale_percent = product.sale_percent
+                sale_percent = product.sale
                 quantity = cart_item.quantity
-                auth_price = price - (price * auth_percent / 100)
-                sale_price = price - (price * sale_percent / 100)
-                sale_auth_price = auth_price - (auth_price * sale_percent / 100)
+                auth_price = product.price_for_authenticated
+                sale_price = None
+                sale_auth_price = None
+                if product.sale:
+
+                    sale_auth_price = auth_price - (auth_price * sale_percent / 100)
+                    sale_price = price - (price * sale_percent / 100)
 
                 item_data = {
                     'name': name,
@@ -220,18 +219,24 @@ class OrderAPIView(APIView):
 
                 new_items.append(item_data)
 
+            total = order.total
+            result = order.total
+            if order.discount:
+                discount = order.discount.discount
+                result -= total * discount / 100
+
+            if company_total_auth:
+                result -= float(company_total_auth)
+
             context_data = {
                 "user": self.request.user,
-                "auth_percent": auth_percent if auth_percent else 0,
                 "bank_details": bank_details,
                 "items": new_items,
                 "number": order.number,
                 "created_date": order.order_date,
-                "total": "{:.2f}".format(order.total_auth),  # Format total to 2 digits after the decimal point
-                "total_discount": "{:.2f}".format(
-                    order.total_auth - order.total_auth * order.discount.discount / 100) if order.discount else 0,
+                "total": "{:.2f}".format(result + 3),
                 "discount": order.discount.discount if order.discount else 0,
-                "company": "{:.2f}".format(company.sale_percent) if company else 0,
+                "company": company.sale_percent if company else 0,
                 "billing": billing
             }
             template = get_template('orders/invoice.html')
@@ -246,11 +251,9 @@ class OrderAPIView(APIView):
                 f.write(pdf_file)
 
             order.invoice = file_path
-            print("file_path", file_path)
 
             url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
             order.invoice_url = url
-            print("file_path", url)
             order.save()
 
             email_body = (
@@ -262,9 +265,10 @@ class OrderAPIView(APIView):
             )
 
             email = EmailMessage(
-                subject='Your Invoice',
+                subject=f"{number} Invoice Floristika",
                 body=email_body,
-                to=['mike@codnity.com'],
+                to=[self.request.user.email,],
+                from_email=settings.EMAIL_HOST_USER,
             )
             email.attach_file(file_path)
             email.send()
@@ -316,10 +320,8 @@ class OrderGuestAPIView(APIView):
             country=data['country'],
             phone=data['phone'],
         )
-        auth_percent = AuthPercent.objects.first().percent
         cart_objs = []
         total = 0
-        total_auth = 0
         discount = None
         if len(self.request.data.get('discount')):
             discount = Discount.objects.get(code=self.request.data.get('discount'))
@@ -330,24 +332,23 @@ class OrderGuestAPIView(APIView):
                 product=product,
                 quantity=quantity,
                 guest=guest,
+                price=product.price,
+                price_for_authenticated=product.price_for_authenticated,
+                sale=product.sale,
             )
             product.qty -= quantity
             product.sold += quantity
             product.save()
             price = product.price
             if product.sale:
-                price = product.price - (product.price * product.sale_percent / 100)
-            price_auth = price - (price * auth_percent / 100)
+                price = product.price - (product.price * product.sale / 100)
             total += price * quantity
-            total_auth += price_auth * quantity
             cart_objs.append(order_item)
 
         order = Order.objects.create(
             guest=guest,
             discount=discount,
             total=total,
-            auth_percent=auth_percent,
-            total_auth=total_auth,
             number=number,
             shipping=shipping,
             store=store,
@@ -357,80 +358,84 @@ class OrderGuestAPIView(APIView):
         for cart_obj in cart_objs:
             order.items.add(cart_obj)
         order.save()
-        try:
-            context_data = {}
+        bank_details = BankDetails.objects.first()
+        new_items = []
 
-            template = get_template('orders/invoice.html')
-            html_content = template.render(context_data)
+        for cart_item in cart_objs:
+            product = cart_item.product
+            name = product.name
+            price = product.price
+            sale = product.sale
+            sale_percent = product.sale
+            quantity = cart_item.quantity
+            sale_price = None
+            if product.sale:
+                sale_price = price - (price * sale_percent / 100)
 
-            pdf_file = HTML(string=html_content).write_pdf()
+            item_data = {
+                'name': name,
+                'price': price,
+                'sale': sale,
+                'sale_percent': sale_percent,
+                'quantity': quantity,
+                'sale_price': sale_price,
+            }
 
-            directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", str(generate_numeric_order_number()))
-            os.makedirs(directory_path, exist_ok=True)
-            file_path = os.path.join(directory_path, 'output.pdf')
-            with open(file_path, 'wb') as f:
-                f.write(pdf_file)
+            new_items.append(item_data)
 
-            # invoice_file=file_path,
-            order.invoice = file_path
-            order.save()
+        total = order.total
+        result = order.total
+        if order.discount:
+            discount = order.discount.discount
+            result -= total * discount / 100
 
-            email_body = (
-                'Dear Customer,\n\n'
-                'Thank you for your order. '
-                'Please make the payment and send the invoice to us so we can update your status.\n\n'
-                'Best regards,\n'
-                'Your Company Name'
-            )
+        context_data = {
+            "user": self.request.user,
+            "bank_details": bank_details,
+            "items": new_items,
+            "number": order.number,
+            "created_date": order.order_date,
+            "total": "{:.2f}".format(result + 3),
+            "discount": order.discount.discount if order.discount else 0,
+            "billing": billing
+        }
 
-            email = EmailMessage(
-                subject='Your Invoice',
-                body=email_body,
-                to=['mike@codnity.com'],
-            )
-            email.attach_file(file_path)
-            email.send()
+        template = get_template('orders/invoice.html')
+        html_content = template.render(context_data)
 
-            serializer = OrderSerializer(order, many=False)
-            return Response(serializer.data)
+        pdf_file = HTML(string=html_content).write_pdf()
 
-        except Exception as e:
-            return Response({'file_path': file_path, 'context': context_data})
+        directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", str(generate_numeric_order_number()))
+        os.makedirs(directory_path, exist_ok=True)
+        file_path = os.path.join(directory_path, f"invoice_{number}.pdf")
+        with open(file_path, 'wb') as f:
+            f.write(pdf_file)
+        order.invoice = file_path
+        url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
+        order.invoice_url = url
+        order.save()
 
-    def get(self, request, number):
-        print(number, "NUMBER")
-        order = Order.objects.get(number=number)
+        email_body = (
+            'Dear Customer,\n\n'
+            'Thank you for your order. '
+            'Please make the payment and send the invoice to us so we can update your status.\n\n'
+            'Best regards,\n'
+            'Floristika'
+        )
+
+        email = EmailMessage(
+            subject=f"{number} Invoice Floristika",
+            body=email_body,
+            to=[guest.email,],
+            from_email=settings.EMAIL_HOST_USER,
+        )
+        email.attach_file(file_path)
+        email.send()
+
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
 
-
-class GeneratePDFAPIView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        try:
-            # Get data from request
-            context_data = {
-                'customer_name': 'John Doe',
-            }
-
-            # Render HTML template with context
-            template = get_template('orders/invoice.html')
-            html_content = template.render(context_data)
-            print(html_content)
-            # Convert HTML to PDF
-            pdf_file = HTML(string=html_content).write_pdf()
-
-            directory_path = os.path.join(settings.MEDIA_ROOT, "invoices" , str(generate_numeric_order_number()))
-            print(directory_path, "DIRECTORY PATH")
-            os.makedirs(directory_path, exist_ok=True)
-
-            file_path = os.path.join(directory_path, 'output.pdf')
-
-            with open(file_path, 'wb') as f:
-                f.write(pdf_file)
-
-            return Response({'file_path': file_path, 'context': context_data})
-
-        except Exception as e:
-            return HttpResponseServerError(str(e))
+    def get(self, request, number):
+        order = Order.objects.get(number=number)
+        serializer = OrderSerializer(order, many=False)
+        return Response(serializer.data)

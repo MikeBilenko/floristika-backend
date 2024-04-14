@@ -13,16 +13,11 @@ CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080","http:/
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# EMAIL_BACKEND = "djcelery_email.backends.CeleryEmailBackend"
-# EMAIL_HOST = env("EMAIL_HOST",default="mailhog")
-# EMAIL_PORT = env("EMAIL_PORT")
-# DEFAULT_FROM_EMAIL = "floristika.staff@gmail.com"
-# DOMAIN = env("DOMAIN")
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'floristika.staf@gmail.com'
 EMAIL_HOST_PASSWORD = 'olrj cysq djvf uxrq'
 SITE_NAME = "Floristika"

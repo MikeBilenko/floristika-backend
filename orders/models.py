@@ -33,7 +33,7 @@ class Cart(models.Model):
 
 
 class Guest(models.Model):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=False)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=255)
@@ -51,6 +51,9 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest = models.ForeignKey(Guest, on_delete=models.CASCADE, null=True, blank=True)
+    sale = models.FloatField(null=True, blank=True)
+    price = models.FloatField(null=True, blank=True)
+    price_for_authenticated = models.FloatField(null=True, blank=True)
 
 
 class OrderStatus(models.TextChoices):
@@ -61,6 +64,7 @@ class OrderStatus(models.TextChoices):
     CANCELLED = 'cancelled', 'Cancelled'
     REFUNDED = 'refunded    ', 'Refunded'
     ON_HOLD = 'on-hold', 'On Hold'
+    READY_FOR_PICKUP = 'ready-for-pickup', 'Ready for Pickup'
     COMPLETED = 'completed', 'Completed'
 
 
@@ -86,9 +90,7 @@ class Order(models.Model):
     items = models.ManyToManyField(OrderItem)
     number = models.CharField(max_length=255)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    auth_percent = models.IntegerField(default=0)
-    total_auth = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    company_total_auth = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    company_total_auth = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     order_date = models.DateTimeField(auto_now_add=True)
     shipping = models.ForeignKey(Shipping, on_delete=models.CASCADE, null=True, blank=True)
     store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, blank=True)

@@ -50,11 +50,6 @@ THIRD_PARTY_APPS = [
     'allauth.socialaccount',
     'dj_rest_auth',
     'dj_rest_auth.registration',
-
-    # 'allauth.socialaccount.providers.facebook',
-    'allauth.socialaccount.providers.google',
-    # 'allauth.socialaccount.providers.microsoft',
-    # 'allauth.socialaccount.providers.twitter',
 ]
 
 LOCAL_APPS = [
@@ -72,23 +67,12 @@ LOCAL_APPS = [
     'orders',
     'search',
     'store',
+    'supersecret',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 LOGIN_REDIRECT_URL = '/'
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        # For each OAuth based provider, either add a ``SocialApp``
-        # (``socialaccount`` app) containing the required client
-        # credentials, or list them here:
-        'APP': {
-            'client_id': '607710595994-itpfd4n7ggqv2koqlnurvf4icib0hi0k.apps.googleusercontent.com',
-            'secret': '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',
-        }
-    }
-}
 
 
 AUTHENTICATION_BACKENDS = [
@@ -107,7 +91,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'authors_api.urls'
+ROOT_URLCONF = 'floristika_backend.urls'
 
 TEMPLATES = [
     {
@@ -120,12 +104,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'users.context_processors.env_variables',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'authors_api.wsgi.application'
+WSGI_APPLICATION = 'floristika_backend.wsgi.application'
 
 
 # Database

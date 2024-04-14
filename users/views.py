@@ -21,7 +21,6 @@ class CustomUserDetailView(generics.RetrieveUpdateAPIView):
         return get_user_model().objects.none()
 
 
-
 class AddressBookDetail(APIView):
     serializer_class = AddressBookSerializer
     permission_classes = [IsAuthenticated]
@@ -36,7 +35,6 @@ class AddressBookDetail(APIView):
         address_book = user.address_books.get(pk=pk)
         address_book.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 class AddressBookView(APIView):
@@ -86,7 +84,6 @@ class CompanyView(APIView):
     def post(self, request):
         user = self.request.user
         data = request.data  # Retrieve request data
-        print(request.data)
         if Company.objects.filter(user=user).exists():
             # If company exists for the user, update it
             company = Company.objects.get(user=user)
@@ -130,7 +127,6 @@ class WishlistView(APIView):
 class DetailWishListAPIView(APIView):
     def get(self, request, slug):
         try:
-            print(slug, "SLUG")
             user = self.request.user
             product = Product.objects.get(slug=slug)
             wishlist = WishList.objects.get(user=user, product=product)
@@ -148,7 +144,6 @@ class DetailWishListAPIView(APIView):
     def post(self, request, slug):
 
         user = self.request.user
-        print(user)
         product = Product.objects.get(slug=slug)
         if WishList.objects.filter(user=user, product=product).exists():
             return Response(status=status.HTTP_204_NO_CONTENT)

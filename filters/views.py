@@ -33,7 +33,6 @@ class CategorySizeListApiView(APIView):
     permission_classes = [AllowAny]
 
     def get(self,request, category):
-        print(category)
         category_item = Category.objects.get(slug=category)
         products = Product.objects.filter(category=category_item)
         sizes = Size.objects.filter(product__in=products).distinct()
@@ -49,13 +48,12 @@ class SizeListApiView(ListAPIView):
 
 
 class PriceRangeView(APIView):
-  """
+    """
     API view to retrieve the minimum and maximum prices of all products.
-  """
-  permission_classes = [AllowAny]
-
-  def get(self, request):
-    price_range = Product.objects.aggregate(Min('price'), Max('price'))
-    min_price = price_range['price__min']
-    max_price = price_range['price__max']
-    return Response({'min_price': min_price, 'max_price': max_price})
+    """
+    permission_classes = [AllowAny]
+    def get(self, request):
+        price_range = Product.objects.aggregate(Min('price'), Max('price'))
+        min_price = price_range['price__min']
+        max_price = price_range['price__max']
+        return Response({'min_price': min_price, 'max_price': max_price})

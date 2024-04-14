@@ -8,8 +8,9 @@ from .models import (
     Guest,
 )
 from discount.serializers import DiscountSerializer
-from users.serializers import CompanySerializer
+from users.serializers import CompanySerializer, UserSerializer
 from product.serializers import ProductSerializer
+from store.serializers import StoreSerializer
 
 
 class GuestSerializer(serializers.ModelSerializer):
@@ -48,6 +49,8 @@ class OrderSerializer(serializers.ModelSerializer):
     discount = DiscountSerializer()
     company = CompanySerializer()
     guest = GuestSerializer()
+    user = UserSerializer()
+    store = StoreSerializer()
 
     class Meta:
         fields = "__all__"

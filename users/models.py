@@ -14,7 +14,7 @@ class AddressBook(models.Model):
     city = models.CharField(verbose_name=_("City"), max_length=150, null=True, blank=True)
     postal_code = models.CharField(max_length=120, verbose_name=_("Postal Code"), null=True, blank=True)
     country = CountryField(null=True, blank=True)
-    phone = PhoneNumberField(verbose_name=_("Phone number"), max_length=15, null=True, blank=True)
+    phone = models.CharField(verbose_name=_("Phone number"), max_length=15, null=True, blank=True)
     delivery = models.BooleanField(default=False)
     billing = models.BooleanField(default=False)
 
@@ -65,7 +65,7 @@ class Company(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, null=False, blank=False)
     country = CountryField(null=True, blank=True)
     email = models.EmailField(verbose_name=_("email address"), db_index=True, unique=True)
-    phone = PhoneNumberField(verbose_name=_("Phone number"), max_length=15, null=True, blank=True)
+    phone = models.CharField(verbose_name=_("Phone number"), max_length=20, null=True, blank=True)
     city = models.CharField(verbose_name=_("City"), max_length=150, null=True, blank=True)
     company_name = models.CharField(verbose_name=_("Company Name"), max_length=150, null=True, blank=True)
     vat = models.CharField(verbose_name=_("VAT"), max_length=150, null=True, blank=True)

@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Order, OrderItem, Cart, Guest, Shipping, Billing, BankDetails
 from django import forms
+from django.core.mail import EmailMessage
+from django.conf import settings
+
 
 class OrderAdminForm(forms.ModelForm):
     class Meta:
@@ -12,8 +15,8 @@ class OrderAdminForm(forms.ModelForm):
 
 
 class OrderItemInline(admin.TabularInline):
-    model = Order.items.through  # This is the intermediary model for the many-to-many relationship
-    extra = 0  # Number of empty forms to display
+    model = Order.items.through
+    extra = 0
 
 
 class OrderAdmin(admin.ModelAdmin):
@@ -21,6 +24,25 @@ class OrderAdmin(admin.ModelAdmin):
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
     readonly_fields = ('shipping_address', 'billing_address', 'store_name')
+
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data:
+            email_body = (
+                'Dear Customer,\n\n'
+                f'Hey, the status of your order {obj.number}\n has been updated. Now it is {obj.get_status_display()}.\n\n'
+                'Best regards,\n'
+                'Floristika'
+            )
+            user = obj.user or obj.guest
+            if user:
+                email = EmailMessage(
+                    subject=f"Order {obj.number} Status Update",
+                    body=email_body,
+                    to=[user.email, ],
+                    from_email=settings.EMAIL_HOST_USER,
+                )
+                email.send()
+        super().save_model(request, obj, form, change)
 
     def shipping_address(self, obj):
         if obj.shipping:
@@ -42,7 +64,6 @@ class OrderAdmin(admin.ModelAdmin):
         return "N/A"
 
     store_name.short_description = 'Store'
-
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -76,8 +97,12 @@ class BankDetailsAdmin(admin.ModelAdmin):
         )
 
 
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ("product", "price", "price_for_authenticated", "sale")
+
+
 admin.site.register(Order, OrderAdmin)
-admin.site.register(OrderItem)
+admin.site.register(OrderItem, OrderItemAdmin)
 admin.site.register(Cart)
 admin.site.register(Guest)
 admin.site.register(Shipping)

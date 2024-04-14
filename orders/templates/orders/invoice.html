@@ -184,8 +184,6 @@ footer {
                   <td>€{{ item.price }}</td>
               {% endif %}
             </td>
-
-
             {% endif %}
           </tr>
           {% endfor %}
@@ -195,22 +193,37 @@ footer {
         <div class="total-content">
           <div>TOTAL</div>
           <div>
-            {% if discount > 0%}
-            €{{ total_discount|floatformat:2 }}
-            {% else %}
-            €{{ total|floatformat:2 }}
-            {% endif %}
+            €{{  total }}
           </div>
         </div>
       </div>
+      <div>
+          {% if company > 0 %}
+            <div>
+              With {{company}}% for company discount;
+            </div>
+          {% endif %}
+          {% if discount > 0 %}
+            <div>
+              With {{discount}}%  discount from code;
+            </div>
+          {% endif %}
+        </div>
       <div class="details">
         <b>Bank name: </b> {{ bank_details.bank_name }} <br />
         <b>Bank account: </b> {{ bank_details.iban }}
       </div>
     </div>
     <footer>
-      If you have any questions please contact: floristika@mail.com; +371
-      27483463
+      <div>
+        If you have any questions please contact:
+      </div>
+       <div>
+         floristika@mail.com
+       </div>
+      <div>
+        +371 27483463
+      </div>
     </footer>
   </body>
 </html>
