@@ -14,7 +14,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://24.144.76.8:8080",
-    "https://plankton-app-znmwk.ondigitalocean.app/"
+    "https://plankton-app-znmwk.ondigitalocean.app"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
