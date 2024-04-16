@@ -7,7 +7,9 @@ SECRET_KEY = env("DJANGO_SECRET_KEY",default="nIju4v4-HD0Q7qYNT2NqoC1C_h3Q4ucUGF
 # SECURITY WARNING: don't run with debug turned on in .production!
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080","http://localhost:5173","http://localhost:3000"]
+ALLOWED_HOSTS = ["24.144.76.8", ]
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8080","http://localhost:5173","http://localhost:3000", "24.144.76.8"]
 # CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
 
 
