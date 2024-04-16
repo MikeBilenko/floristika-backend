@@ -7,15 +7,23 @@ SECRET_KEY = env("DJANGO_SECRET_KEY",default="nIju4v4-HD0Q7qYNT2NqoC1C_h3Q4ucUGF
 # SECURITY WARNING: don't run with debug turned on in .production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["24.144.76.8", ]
+ALLOWED_HOSTS = ["24.144.76.8",]
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "http://localhost:8080",
-#     "http://127.0.0.1:8080",
-#     "http://localhost:3000",
-#     "http://24.144.76.8:8080",
-#     "https://plankton-app-znmwk.ondigitalocean.app/"
-# ]
+# Allow requests from specific origins
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:3000",
+    "https://plankton-app-znmwk.ondigitalocean.app"
+]
+
+# Trust CSRF cookies from these origins
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:3000",
+    "https://plankton-app-znmwk.ondigitalocean.app"
+]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
