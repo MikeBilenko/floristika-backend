@@ -9,22 +9,23 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["24.144.76.8",]
 
-# Allow requests from specific origins
-CORS_ALLOWED_ORIGINS = [
+# # Allow requests from specific origins
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+#     "http://localhost:3000",
+#     "http://24.144.76.8:8080",
+#     "https://plankton-app-znmwk.ondigitalocean.app"
+# ]
+
+# # Trust CSRF cookies from these origins
+CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://24.144.76.8:8080",
     "https://plankton-app-znmwk.ondigitalocean.app"
 ]
-
-# # Trust CSRF cookies from these origins
-# CSRF_TRUSTED_ORIGINS = [
-#     "http://localhost:8080",
-#     "http://127.0.0.1:8080",
-#     "http://localhost:3000",
-#     "https://plankton-app-znmwk.ondigitalocean.app"
-# ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
