@@ -25,7 +25,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://plankton-app-znmwk.ondigitalocean.app"
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
