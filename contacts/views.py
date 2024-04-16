@@ -14,6 +14,7 @@ class ContactCreateApiView(generics.CreateAPIView):
 
 class ContactInfoApiView(generics.ListAPIView):
     permission_classes = [AllowAny]
+    serializer_class = ContactInfoSerializer
 
     def get(self, request, *args, **kwargs):
         instance = ContactInfo.objects.first()
