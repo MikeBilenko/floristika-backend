@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 # TODO: change in .production
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "floristika_backend.settings.local")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "floristika_backend.settings.production")
 
 app = Celery("Floristika")
 
