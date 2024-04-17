@@ -7,7 +7,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY",default="nIju4v4-HD0Q7qYNT2NqoC1C_h3Q4ucUGF
 # SECURITY WARNING: don't run with debug turned on in .production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["24.144.76.8", "backend.floristika.life"]
+ALLOWED_HOSTS = ["24.144.76.8", "backendfloristika.life", "127.0.0.1", "localhost"]
 
 # # Allow requests from specific origins
 CORS_ALLOWED_ORIGINS = [
@@ -15,7 +15,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://24.144.76.8:8080",
-    "https://backend.floristika.life",
+    "https://backendfloristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app"
 ]
 
@@ -25,7 +25,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://24.144.76.8:8080",
-    "https://backend.floristika.life",
+    "https://backendfloristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app"
 ]
 
