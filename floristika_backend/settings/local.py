@@ -24,7 +24,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://baclendfloristika.life:8080",
     "https://floristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app",
-    "http://159.65.206.54",
+    "http://159.65.206.54:8080",
+    "http://24.144.76.8:8080"
 ]
 
 # # Trust CSRF cookies from these origins
@@ -36,7 +37,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://baclendfloristika.life:8080",
     "https://floristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app",
-    "http://159.65.206.54"
+    "http://159.65.206.54:8080",
+    "http://24.144.76.8:8080"
+
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
