@@ -6,7 +6,8 @@ ADMINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://https://baclendfloristika.life"
+    "https://https://baclendfloristika.life",
+    "https://floristika.life",
 ]
 
 CORS_ALLOWED_ORIGINS = [
