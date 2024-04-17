@@ -84,7 +84,7 @@ services:
       context: ./docker/local/nginx
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8080:80"
     networks:
       - authors-api
 

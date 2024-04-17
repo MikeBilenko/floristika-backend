@@ -7,28 +7,36 @@ SECRET_KEY = env("DJANGO_SECRET_KEY",default="nIju4v4-HD0Q7qYNT2NqoC1C_h3Q4ucUGF
 # SECURITY WARNING: don't run with debug turned on in .production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["24.144.76.8", "baclendfloristika.life", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = [
+    "24.144.76.8",
+    "baclendfloristika.life",
+    "127.0.0.1",
+    "localhost",
+    "159.65.206.54"
+]
 
 # # Allow requests from specific origins
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
     "http://localhost:3000",
     "https://baclendfloristika.life",
-    "https://baclendfloristika.life:8000",
+    "https://baclendfloristika.life:8080",
     "https://floristika.life",
-    "https://plankton-app-znmwk.ondigitalocean.app"
+    "https://plankton-app-znmwk.ondigitalocean.app",
+    "http://159.65.206.54",
 ]
 
 # # Trust CSRF cookies from these origins
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
     "http://localhost:3000",
     "https://baclendfloristika.life",
-    "https://baclendfloristika.life:8000",
+    "https://baclendfloristika.life:8080",
     "https://floristika.life",
-    "https://plankton-app-znmwk.ondigitalocean.app"
+    "https://plankton-app-znmwk.ondigitalocean.app",
+    "http://159.65.206.54"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
