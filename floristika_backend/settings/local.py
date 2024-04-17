@@ -12,7 +12,8 @@ ALLOWED_HOSTS = [
     "baclendfloristika.life",
     "127.0.0.1",
     "localhost",
-    "159.65.206.54"
+    "159.65.206.54",
+    "134.209.253.68"
 ]
 
 # # Allow requests from specific origins
@@ -25,7 +26,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://floristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app",
     "http://159.65.206.54:8080",
-    "http://24.144.76.8:8080"
+    "http://24.144.76.8:8080",
+    "http://134.209.253.68:8080/",
 ]
 
 # # Trust CSRF cookies from these origins
@@ -38,7 +40,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://floristika.life",
     "https://plankton-app-znmwk.ondigitalocean.app",
     "http://159.65.206.54:8080",
-    "http://24.144.76.8:8080"
+    "http://24.144.76.8:8080",
+    "http://134.209.253.68:8080/"
 
 ]
 
