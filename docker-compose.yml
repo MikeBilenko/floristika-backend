@@ -1,101 +1,66 @@
 version: "3.9"
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: ./docker/local/django/Dockerfile
-    volumes:
-      - .:/app:z
-      - static_volume:/app/staticfiles
-      - media_volume:/app/mediafiles
-    expose:
-      - "8000"
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    depends_on:
-      - redis
-      - postgres
+    api: &api
+        build:
+            context: .
+            dockerfile: ./docker/production/django/Dockerfile
+        command: /start
+        image: floristika_backend
+        volumes:
+            - static_volume:/app/staticfiles
+            - media_volume:/app/mediafiles
+        env_file:
+            - ./.envs/.production/.django
+            - ./.envs/.production/.postgres
+        depends_on:
+            - postgres
+            - redis
+            - es
+        networks:
+            - reverseproxy_nw
 
-    command: /start
-    networks:
-      - authors-api
+    postgres:
+        build:
+            context: .
+            dockerfile: ./docker/production/postgres/Dockerfile
+        image: floristika_backend_database
+        volumes:
+            - production_postgres_data:/var/lib/postgresql/data
+            - production_postgres_data_backups:/backups
+        env_file:
+            - ./.envs/.production/.postgres
+        networks:
+            - reverseproxy_nw
 
-  postgres:
-    build:
-      context: .
-      dockerfile: ./docker/local/postgres/Dockerfile
-    volumes:
-      - local_postgres_data:/var/lib/postgresql/data
-      - local_postgres_data_backups:/backups
-    env_file:
-      - ./.envs/.local/.postgres
-    networks:
-      - authors-api
+    redis:
+        image: redis:7-alpine
+        networks:
+            - reverseproxy_nw
 
-  redis:
-    image: redis:7-alpine
-    networks:
-      - authors-api
+    celery_worker:
+        <<: *api
+        image: floristika_backend_celery_worker
+        command: /start-celeryworker
+        networks:
+            - reverseproxy_nw
 
-  celery_worker:
-    build:
-      context: .
-      dockerfile: ./docker/local/django/Dockerfile
-    command: /start-celeryworker
-    volumes:
-      - .:/app
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    depends_on:
-      - redis
-      - postgres
-    networks:
-      - authors-api
-
-  flower:
-    build:
-      context: .
-      dockerfile: ./docker/local/django/Dockerfile
-    command: /start-flower
-    volumes:
-      - flower_data:/data
-    env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
-    ports:
-      - "5555:5555"
-    depends_on:
-      - redis
-      - postgres
-    networks:
-      - authors-api
-
-  nginx:
-    restart: always
-    depends_on:
-      - api
-    volumes:
-      - static_volume:/app/staticfiles
-      - media_volume:/app/mediafiles
-    build:
-      context: ./docker/local/nginx
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    networks:
-      - authors-api
-
+    flower:
+        <<: *api
+        image: floristika_backend_flower
+        command: /start-flower
+        volumes:
+            - flower_data:/data
+        networks:
+            - reverseproxy_nw
 
 networks:
-  authors-api:
-    driver: bridge
+    reverseproxy_nw:
+        external: true
 
 volumes:
-  static_volume:
-  media_volume:
-  local_postgres_data: {}
-  local_postgres_data_backups: {}
-  flower_data: {}
+    static_volume: {}
+    media_volume: {}
+    production_postgres_data: {}
+    production_postgres_data_backups: {}
+    flower_data: {}
