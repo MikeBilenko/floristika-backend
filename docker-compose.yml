@@ -37,13 +37,25 @@ services:
     depends_on:
       - api
     volumes:
+      - etc-letsencrypt:/etc/letsencrypt
+      - www-html:/var/www/html
       - static_volume:/app/staticfiles
       - media_volume:/app/mediafiles
     build:
       context: ./docker/local/nginx
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "80:80"
+    networks:
+      - floristika
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - etc-letsencrypt:/etc/letsencrypt
+      - www-html:/var/www/html
+    depends_on:
+      - nginx
     networks:
       - floristika
 
@@ -57,3 +69,5 @@ volumes:
   media_volume:
   local_postgres_data: {}
   local_postgres_data_backups: {}
+  etc-letsencrypt: {}
+  www-html: {}
