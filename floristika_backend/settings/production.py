@@ -26,12 +26,10 @@ CORS_ALLOWED_ORIGINS = [
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 ALLOWED_HOSTS = [
-    "24.144.76.8",
     "baclendfloristika.life",
     "127.0.0.1",
     "localhost",
-    "159.65.206.54",
-    "134.209.253.68"
+    "104.248.251.160",
 ]
 
 DATABASES = {
