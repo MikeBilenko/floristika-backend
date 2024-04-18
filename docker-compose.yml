@@ -54,6 +54,7 @@ services:
     volumes:
       - etc-letsencrypt:/etc/letsencrypt
       - www-html:/var/www/html
+    command: certonly
     depends_on:
       - nginx
     networks:
