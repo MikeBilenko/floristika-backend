@@ -50,15 +50,15 @@ services:
     networks:
       - floristika
 
-  certbot:
-    image: certbot/certbot:latest
-    volumes:
-      - etc-letsencrypt:/etc/letsencrypt
-      - www-html:/var/www/html
-    depends_on:
-      - nginx
-    networks:
-      - floristika
+#  certbot:
+#    image: certbot/certbot:latest
+#    volumes:
+#      - etc-letsencrypt:/etc/letsencrypt
+#      - www-html:/var/www/html
+#    depends_on:
+#      - nginx
+#    networks:
+#      - floristika
 
 
 networks:
