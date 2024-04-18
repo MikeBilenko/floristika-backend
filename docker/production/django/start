@@ -7,4 +7,4 @@ set -o nounset
 python /app/manage.py collectstatic --noinput
 python /app/manage.py migrate
 
-exec /usr/local/bin/gunicorn floristika_backend.wsgi --bind 0.0.0.0:1998 --chdir=/app
+exec python manage.py runserver 0.0.0.0:8000

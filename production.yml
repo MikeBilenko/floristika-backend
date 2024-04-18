@@ -15,8 +15,6 @@ services:
             - ./.envs/.production/.postgres
         depends_on:
             - postgres
-            - redis
-            - es
         networks:
             - reverseproxy_nw
 
@@ -33,34 +31,26 @@ services:
         networks:
             - reverseproxy_nw
 
-    redis:
-        image: redis:7-alpine
-        networks:
-            - reverseproxy_nw
-
-    celery_worker:
-        <<: *api
-        image: floristika_backend_celery_worker
-        command: /start-celeryworker
-        networks:
-            - reverseproxy_nw
-
-    flower:
-        <<: *api
-        image: floristika_backend_flower
-        command: /start-flower
+    nginx:
+        restart: always
+        depends_on:
+            - api
         volumes:
-            - flower_data:/data
+            - static_volume:/app/staticfiles
+            - media_volume:/app/mediafiles
+        build:
+            context: ./docker/production/nginx
+            dockerfile: Dockerfile
+        ports:
+            - "8080:80"
         networks:
             - reverseproxy_nw
 
 networks:
     reverseproxy_nw:
-        external: true
 
 volumes:
     static_volume: {}
     media_volume: {}
     production_postgres_data: {}
     production_postgres_data_backups: {}
-    flower_data: {}

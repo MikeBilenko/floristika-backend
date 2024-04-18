@@ -54,7 +54,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
     default=True
 )
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

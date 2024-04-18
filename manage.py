@@ -7,7 +7,7 @@ import sys
 def main():
     """Run administrative tasks."""
     # TODO: change to .production
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'floristika_backend.settings.local')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'floristika_backend.settings.production')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
