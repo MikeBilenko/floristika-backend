@@ -54,7 +54,7 @@ services:
     volumes:
       - etc-letsencrypt:/etc/letsencrypt
       - www-html:/var/www/html
-    command: certonly
+    command: sudo certbot certonly --standalone --preferred-challenges http -d baclendfloristika.life
     depends_on:
       - nginx
     networks:
