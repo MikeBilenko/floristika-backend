@@ -54,7 +54,7 @@ services:
     volumes:
       - etc-letsencrypt:/etc/letsencrypt
       - www-html:/var/www/html
-    command: certonly --standalone --preferred-challenges http -d baclendfloristika.life
+    command: certonly --webroot -w /var/www/html -m bilenkomike18@gmail.com --agree-tos -d www.baclendfloristika.life -d www.baclendfloristika.life
     depends_on:
       - nginx
     networks:
