@@ -1,68 +1,59 @@
 version: "3.9"
 
 services:
-    api: &api
-        build:
-            context: .
-            dockerfile: ./docker/production/django/Dockerfile
-        command: /start
-        image: floristika_backend
-        volumes:
-            - static_volume:/app/staticfiles
-            - media_volume:/app/mediafiles
-        env_file:
-            - ./.envs/.production/.django
-            - ./.envs/.production/.postgres
-        depends_on:
-            - postgres
-        networks:
-            - reverseproxy_nw
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/local/django/Dockerfile
+    volumes:
+      - .:/app:z
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    expose:
+      - "8000"
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    depends_on:
+      - postgres
+    command: /start
+    networks:
+      - floristika
 
-    postgres:
-        build:
-            context: .
-            dockerfile: ./docker/production/postgres/Dockerfile
-        image: floristika_backend_database
-        volumes:
-            - production_postgres_data:/var/lib/postgresql/data
-            - production_postgres_data_backups:/backups
-        env_file:
-            - ./.envs/.production/.postgres
-        networks:
-            - reverseproxy_nw
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/local/postgres/Dockerfile
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+    networks:
+      - floristika
 
-    nginx:
-        restart: always
-        depends_on:
-            - api
-        volumes:
-            - static_volume:/app/staticfiles
-            - media_volume:/app/mediafiles
-            - ./nginx/conf.d/:/etc/nginx/conf.d/
-        build:
-            context: ./docker/production/nginx
-            dockerfile: Dockerfile
-        ports:
-            - "80:80"
-            - "443:443"
-        networks:
-            - reverseproxy_nw
+  nginx:
+    restart: always
+    depends_on:
+      - api
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+    build:
+      context: ./docker/local/nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - floristika
 
-    certbot:
-        image: certbot/certbot:latest
-        volumes:
-            - /var/certbot/conf:/etc/letsencrypt/:rw
-            - /var/certbot/www/:/var/www/certbot/:rw
-        depends_on:
-            - nginx
-        networks:
-            - reverseproxy_nw
 
 networks:
-    reverseproxy_nw:
+  floristika:
+    driver: bridge
 
 volumes:
-    static_volume: {}
-    media_volume: {}
-    production_postgres_data: {}
-    production_postgres_data_backups: {}
+  static_volume:
+  media_volume:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
