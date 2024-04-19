@@ -10,6 +10,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.baclendfloristika.life",
     "https://floristika.life",
     "http://localhost:3000",
+    "http://192.168.0.204:3000"
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -18,6 +19,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://baclendfloristika.life",
     "https://floristika.life",
     "http://localhost:3000",
+    "http://192.168.0.204:3000"
 ]
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
