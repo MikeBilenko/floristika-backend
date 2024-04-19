@@ -41,13 +41,13 @@ class ProductListApiView(generics.ListAPIView):
         if colors:
             color_slugs = [color.strip().lower() for color in
                            colors.split(',')]
-            queryset = queryset.filter(Q(colors__slug__in=color_slugs) | Q(slug__in=color_slugs))
+            queryset = queryset.filter(Q(color__slug__in=color_slugs) | Q(slug__in=color_slugs))
 
         sizes = self.request.query_params.get('size')
         if sizes:
             size_slugs = [size.strip().lower() for size in
                           sizes.split(',')]
-            queryset = queryset.filter(sizes__in=Size.objects.filter(slug__in=size_slugs))
+            queryset = queryset.filter(size__in=Size.objects.filter(slug__in=size_slugs))
 
         price_from = self.request.query_params.get('price-from')
         price_to = self.request.query_params.get('price-to')
