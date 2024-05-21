@@ -11,22 +11,14 @@ from .models import (
     ProductDescriptionItem,
     ProductDeliveryItem,
     ProductDelivery,
-    ProductCareInstruction
+    ProductCareInstruction,
+    ProductImage,
 )
-
-
-class ImageInline(admin.TabularInline):
-    model = Product.images.through
-    extra = 1
-    fields = ['image', ]  # Specify the fields to display
-
-    def image_preview(self, obj):
-        return obj.image.image_preview() if obj.image else ""
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
     readonly_fields = ['sold', 'rate']
-    inlines = [ImageInline,]
+    # inlines = [ImageInline,]
 
 
 class ProductDescriptionAdmin(TranslationAdmin):
@@ -37,6 +29,7 @@ class ProductDescriptionItemAdmin(TranslationAdmin):
     pass
 
 
+admin.site.register(ProductImage)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductDescription, ProductDescriptionAdmin)
 admin.site.register(ProductDeliveryItem)

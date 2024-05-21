@@ -1,5 +1,4 @@
 from django.db import models
-from image.models import Image
 from category.models import Category, SubCategory
 from filters.models import Size, Color
 from autoslug import AutoSlugField
@@ -55,6 +54,14 @@ class ProductDelivery(models.Model):
         return self.name
 
 
+class ProductImage(models.Model):
+    """Product image."""
+    alt = models.CharField(max_length=255)
+    image = models.ImageField(upload_to="images/%Y/%m/%d", null=False, blank=False)
+    def __str__(self):
+        return self.alt
+
+
 class Product(models.Model):
     """Product model."""
     name = models.CharField(max_length=255)
@@ -67,7 +74,11 @@ class Product(models.Model):
     ], null=True, blank=True)
     qty = models.PositiveIntegerField(default=0)
     sold = models.PositiveIntegerField(default=0)
-    images = models.ManyToManyField(Image, null=True, blank=True)
+    images = models.ManyToManyField(
+        ProductImage,
+        null=True, 
+        blank=True,
+    )
     color = models.ForeignKey(Color,on_delete=models.DO_NOTHING, null=True, blank=True)
     size = models.ForeignKey(Size,on_delete=models.DO_NOTHING, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING, null=True, blank=True)

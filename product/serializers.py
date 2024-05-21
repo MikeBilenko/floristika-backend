@@ -6,13 +6,21 @@ from .models import (
     ProductDescriptionItem,
     ProductDeliveryItem,
     ProductCareInstruction,
-    ProductDelivery
+    ProductDelivery,
+    ProductImage
 )
-from image.serializers import ImageSerializer
+from image.serializers import ImageURLField
 from text.serializers import TextSerializer
 from filters.serializers import ColorSerializer, SizeSerializer
 from category.serializers import CategorySerializer, SubCategorySerializer
 from reviews.models import Review
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    image = ImageURLField()
+    class Meta:
+        fields = "__all__"
+        model = ProductImage
 
 
 class ProductDescriptionItemSerializer(serializers.ModelSerializer):
@@ -56,7 +64,7 @@ class ProductDeliverySerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
     color = ColorSerializer(many=False)
     size = SizeSerializer(many=False)
     category = CategorySerializer(many=False)
@@ -68,7 +76,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    images = ImageSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
     description = ProductDescriptionSerializer(many=False)
     care = ProductCareInstructionSerializer(many=False)
     delivery = ProductDeliverySerializer(many=False)
