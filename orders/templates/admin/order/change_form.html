@@ -8,18 +8,74 @@
     <input
       value="Get Invoice"
       type="button"
-      onclick="getInvoice({{ original.id }});"
+      onclick="getInvoice({{ original.id }}, {{ original.number }});"
     />
     <input
       value="Send Invoice To Client"
       type="button"
-      onclick="getInvoice({{ original.id }});"
+      onclick="sendInvoice({{ original.id }});"
     />
   </div>
   <script>
-    function getInvoice(id, path = null) {
+    function getInvoice(id, number = null) {
       const originalId = id;
-      console.log(originalId);
+    fetch(`${window.location.origin}/api/v1/orders/order/get-invoice/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `invoice_${number}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+    })
+    .catch(error => console.error('Error:', error))
+    .finally(() => {
+        fetch(`${window.location.origin}/api/v1/orders/order/get-invoice/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            console.log("Good");
+        })
+        .catch(error => console.error('Error:', error));
+    });
     }
+
+    function sendInvoice(id) {
+      fetch(`${window.location.origin}/api/v1/orders/order/send-invoice/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        alert("Invoice sent successfully");
+    })
+    .catch(error => console.error('Error:', error))
+    }
+
   </script>
 {% endblock %}

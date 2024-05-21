@@ -305,8 +305,6 @@ class OrderGuestAPIView(APIView):
         for cart_obj in cart_objs:
             order.items.add(cart_obj)
         order.save()
-        
-        
 
         email_body = (
             'Dear Customer,\n\n'
@@ -335,31 +333,32 @@ class OrderGuestAPIView(APIView):
 
 
 class OrderInvoiceAPIView(APIView):
-    """Ge4t Invoice Api View"""
+    """Get Invoice Api View"""
     serializer_class = OrderSerializer
     permission_classes = [AllowAny, ]
     
     def get(self, request, pk):
         order = Order.objects.get(id=pk)
-        user = None
+        guest = False
         bank_details = BankDetails.objects.first()
         if order.user:
-            user = order.user
+            guest = False
         if order.guest:
-            user = order.guest
+            guest = True
+
         invoice = generate_invoice(
             order=order,
-            user=user,
+            guest=guest,
             bank_details=bank_details,
             billing=order.billing,
             company=order.company,
-            cart_objs=order.items,
+            cart_objs=order.items.all(),
             number=order.number,
             company_total_auth=order.company_total_auth,
         )
+
         return FileResponse(open(invoice, "rb"), as_attachment=True)
-        
-        
+
     def delete(self, request, pk):
         order = Order.objects.get(id=pk)
         directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", order.number)
@@ -376,3 +375,53 @@ class OrderInvoiceAPIView(APIView):
                 {"message": "The file does not exist"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class OrderInvoiceSendAPIView(APIView):
+    """Send Invoice Api View"""
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, pk):
+        order = Order.objects.get(id=pk)
+        guest = False
+        bank_details = BankDetails.objects.first()
+        if order.user:
+            guest = False
+        if order.guest:
+            guest = True
+
+        invoice = generate_invoice(
+            order=order,
+            guest=guest,
+            bank_details=bank_details,
+            billing=order.billing,
+            company=order.company,
+            cart_objs=order.items.all(),
+            number=order.number,
+            company_total_auth=order.company_total_auth,
+        )
+
+        email_body = (
+            'Dear Customer,\n\n'
+            'Thank you for your order. '
+            'We are processing your order and will get back to you with invoice soon.\n'
+            'Thanks for waiting! \n\n'
+            'Best regards,\n'
+            'Floristika'
+        )
+        if order.user:
+            email = order.user.email
+        else:
+            email = order.guest.email
+
+        email = EmailMessage(
+            subject=f"{order.number} Order Floristika",
+            body=email_body,
+            to=[email,],
+            from_email=settings.EMAIL_HOST_USER,
+        )
+        email.attach_file(invoice)
+        email.send()
+        os.remove(invoice)
+        return Response(status=status.HTTP_200_OK)

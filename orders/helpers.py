@@ -11,7 +11,7 @@ def generate_numeric_order_number(length=8):
 
 def generate_invoice(
     order,
-    user,
+    guest,
     cart_objs,
     billing,
     company_total_auth,
@@ -20,7 +20,6 @@ def generate_invoice(
     number,
 ):
     new_items = []
-
     for cart_item in cart_objs:
         product = cart_item.product
         name = product.name
@@ -59,7 +58,7 @@ def generate_invoice(
         result -= float(company_total_auth)
 
     context_data = {
-        "user": user,
+        "guest": guest,
         "bank_details": bank_details,
         "items": new_items,
         "number": order.number,

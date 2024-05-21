@@ -169,7 +169,7 @@ footer {
             <td>{{ forloop.counter }}.</td>
             <td>{{ item.name|upper }}</td>
             <td>{{ item.quantity }}</td>
-            {% if user.is_authenticated %}
+            {% if not guest %}
                 {% if item.sale %}
                   <td>SALE -{{item.sale_percent}}% €{{ item.sale_auth_price }}</td>
               {% else %}

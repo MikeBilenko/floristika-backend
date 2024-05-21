@@ -4,6 +4,7 @@ from .views import (
     OrderAPIView,
     OrderGuestAPIView,
     OrderInvoiceAPIView,
+    OrderInvoiceSendAPIView,
 )
 from django.urls import path
 
@@ -15,5 +16,5 @@ urlpatterns = [
     path('order/guest/', OrderGuestAPIView.as_view(), name='crud_order_guest_api_view'),
     path('order/guest/<str:number>/', OrderGuestAPIView.as_view(), name='order_success_api_view'),
     path("order/get-invoice/<int:pk>/",OrderInvoiceAPIView.as_view(),  name="order_get_invoice_api_view"),
-    # path("order/send-invoice/<int:pk>/", name="order_send_invoice_api_view"),
+    path("order/send-invoice/<int:pk>/",OrderInvoiceSendAPIView.as_view(), name="order_send_invoice_api_view"),
 ]
