@@ -56,6 +56,12 @@ class ProductDelivery(models.Model):
 
 class ProductImage(models.Model):
     """Product image."""
+    product = models.ForeignKey(
+        "Product",
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+    )
     alt = models.CharField(max_length=255)
     image = models.ImageField(upload_to="images/%Y/%m/%d", null=False, blank=False)
     def __str__(self):
@@ -76,7 +82,8 @@ class Product(models.Model):
     sold = models.PositiveIntegerField(default=0)
     images = models.ManyToManyField(
         ProductImage,
-        null=True, 
+        related_name="product_images",
+        null=True,
         blank=True,
     )
     color = models.ForeignKey(Color,on_delete=models.DO_NOTHING, null=True, blank=True)
