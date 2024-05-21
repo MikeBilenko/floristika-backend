@@ -18,6 +18,13 @@ from .models import (
 class ImageInline(admin.TabularInline):
     model = ProductImage
     readonly_fields = ["product"]
+    fields = ['image_preview', 'image', 'alt']
+
+    def image_preview(self, obj):
+        if obj.pk:  # Check if the object exists (i.e., it's not a new unsaved instance)
+            return obj.productimage.image_preview()
+        return ""
+    image_preview.short_description = 'Preview'
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
