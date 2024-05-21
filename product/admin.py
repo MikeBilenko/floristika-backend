@@ -15,10 +15,14 @@ from .models import (
     ProductImage,
 )
 
+class ImageInline(admin.TabularInline):
+    model = ProductImage
+    readonly_fields = ["product"]
+
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
     readonly_fields = ['sold', 'rate']
-    # inlines = [ImageInline,]
+    inlines = [ImageInline, ]
 
 
 class ProductDescriptionAdmin(TranslationAdmin):
