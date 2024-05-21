@@ -1,10 +1,10 @@
-{% extends 'admin/change_form.html' %} {% load static custom_tags %} {% block
-submit_buttons_bottom %} {{ block.super }} {% get_api_path as base_path %}
+{% extends 'admin/change_form.html' %} {% load static %} {% block
+submit_buttons_bottom %} {{ block.super }}
 <div class="submit-row">
   <input
     value="Get Invoice"
     type="button"
-    onclick="getInvoice({{ original.id }}, '{{ base_path }}');"
+    onclick="getInvoice({{ original.id }});"
   />
   <input
     value="Send Invoice To Client"
