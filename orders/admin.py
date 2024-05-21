@@ -7,7 +7,7 @@ from .models import (
     Shipping, 
     Billing, 
     BankDetails,
-    OrderOrderItem,
+    # OrderOrderItem,
 )
 from django import forms
 from django.core.mail import EmailMessage
@@ -24,29 +24,16 @@ class OrderAdminForm(forms.ModelForm):
 
 
 class OrderItemInline(admin.TabularInline):
-    model = OrderOrderItem
-    extra = 1
-
+    model = OrderItem
+    readonly_fields = ["order"]
+    
 
 class OrderAdmin(admin.ModelAdmin):
     form = OrderAdminForm
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
-    readonly_fields = ('shipping_address', 'billing_address', 'store_name', 'order_items_details')
+    readonly_fields = ('shipping_address', 'billing_address', 'store_name', )
     
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = super().get_fieldsets(request, obj)
-        fieldsets += [(None, {'fields': ['order_items_details']}),]
-        return fieldsets
-
-    def order_items_details(self, obj):
-        items = OrderItem.objects.filter(order=obj)
-        details = ""
-        for item in items:
-            details += f"Product: {item.product}, Quantity: {item.quantity}, Price: {item.price}, Price for Authenticated: {item.price_for_authenticated}\n"
-        return details
-
-    order_items_details.short_description = 'Order Items Details'
 
     def save_model(self, request, obj, form, change):
         if change and 'status' in form.changed_data:
@@ -124,10 +111,11 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ("product", "price", "price_for_authenticated", "sale")
     
 
-class OrderOrderItemAdmin(admin.ModelAdmin):
-    list_display = ['order', 'orderitem']
+# class OrderOrderItemAdmin(admin.ModelAdmin):
+#     list_display = ['order', 'orderitem']
 
-admin.site.register(OrderOrderItem, OrderOrderItemAdmin)
+# admin.site.register(OrderOrderItem, OrderOrderItemAdmin)
+
 
 
 admin.site.register(Order, OrderAdmin)

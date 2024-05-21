@@ -47,6 +47,12 @@ class Guest(models.Model):
 
 
 class OrderItem(models.Model):
+    order = models.ForeignKey(
+        "Order",
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
+    )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
@@ -87,7 +93,7 @@ class Billing(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest = models.ForeignKey(Guest, on_delete=models.CASCADE, null=True, blank=True)
-    items = models.ManyToManyField(OrderItem)
+    items = models.ManyToManyField(OrderItem, related_name="order_items")
     number = models.CharField(max_length=255)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     company_total_auth = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
@@ -111,16 +117,16 @@ class Order(models.Model):
         return self.number
 
 
-class OrderOrderItem(models.Model):
-    order = models.ForeignKey(
-        Order, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True,
-    )
-    orderitem = models.ForeignKey(
-        OrderItem, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True,
-    )
+# class OrderOrderItem(models.Model):
+#     order = models.ForeignKey(
+#         Order, 
+#         on_delete=models.CASCADE, 
+#         null=True, 
+#         blank=True,
+#     )
+#     orderitem = models.ForeignKey(
+#         OrderItem, 
+#         on_delete=models.CASCADE, 
+#         null=True, 
+#         blank=True,
+#     )
