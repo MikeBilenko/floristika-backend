@@ -19,7 +19,6 @@ class ProductImageInline(admin.TabularInline):
     model = Product.images.through
     extra = 1
     readonly_fields = ['image_preview']
-    fields = ['image', 'alt', 'image_preview']
 
     def image_preview(self, obj):
         if obj.pk:  # Check if the object exists (i.e., it's not a new unsaved instance)
