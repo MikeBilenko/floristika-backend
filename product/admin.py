@@ -16,8 +16,9 @@ from .models import (
 )
 
 class ImageInline(admin.TabularInline):
-    model = ProductImage
-    readonly_fields = ["product"]
+    model = Product.images.through
+    extra = 1
+    readonly_fields = ['image_preview']
     fields = ['image_preview', 'image', 'alt']
 
     def image_preview(self, obj):
