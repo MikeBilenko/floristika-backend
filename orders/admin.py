@@ -1,5 +1,14 @@
 from django.contrib import admin
-from .models import Order, OrderItem, Cart, Guest, Shipping, Billing, BankDetails
+from .models import (
+    Order, 
+    OrderItem, 
+    Cart, 
+    Guest, 
+    Shipping, 
+    Billing, 
+    BankDetails,
+    OrderOrderItem,
+)
 from django import forms
 from django.core.mail import EmailMessage
 from django.conf import settings
@@ -99,6 +108,12 @@ class BankDetailsAdmin(admin.ModelAdmin):
 
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ("product", "price", "price_for_authenticated", "sale")
+    
+
+class OrderOrderItemAdmin(admin.ModelAdmin):
+    list_display = ['order', 'orderitem']
+
+admin.site.register(OrderOrderItem, OrderOrderItemAdmin)
 
 
 admin.site.register(Order, OrderAdmin)

@@ -109,3 +109,18 @@ class Order(models.Model):
 
     def __str__(self):
         return self.number
+
+
+class OrderOrderItem(models.Model):
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+    )
+    orderitem = models.ForeignKey(
+        OrderItem, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True,
+    )
