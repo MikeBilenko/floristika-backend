@@ -18,6 +18,10 @@ from .models import (
 class ImageInline(admin.TabularInline):
     model = Product.images.through
     extra = 1
+    fields = ['image_preview', 'image', 'alt']  # Specify the fields to display
+
+    def image_preview(self, obj):
+        return obj.image.image_preview() if obj.image else ""
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
