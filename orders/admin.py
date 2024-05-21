@@ -33,7 +33,11 @@ class OrderAdmin(admin.ModelAdmin):
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
     readonly_fields = ('shipping_address', 'billing_address', 'store_name', 'order_items_details')
-    fields = ['order_items_details']
+    
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        fieldsets += [(None, {'fields': ['order_items_details']}),]
+        return fieldsets
 
     def order_items_details(self, obj):
         items = OrderItem.objects.filter(order=obj)
