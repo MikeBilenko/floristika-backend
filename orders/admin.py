@@ -33,6 +33,7 @@ class OrderAdmin(admin.ModelAdmin):
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
     readonly_fields = ('shipping_address', 'billing_address', 'store_name', 'order_items_details')
+    fields = ['order_items_details']
 
     def order_items_details(self, obj):
         items = OrderItem.objects.filter(order=obj)
