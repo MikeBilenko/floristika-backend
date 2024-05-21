@@ -24,8 +24,8 @@ class OrderAdminForm(forms.ModelForm):
 
 
 class OrderItemInline(admin.TabularInline):
-    model = Order.items.through
-    extra = 0
+    model = OrderOrderItem
+    extra = 1
 
 
 class OrderAdmin(admin.ModelAdmin):
