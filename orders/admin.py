@@ -32,7 +32,16 @@ class OrderAdmin(admin.ModelAdmin):
     form = OrderAdminForm
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
-    readonly_fields = ('shipping_address', 'billing_address', 'store_name')
+    readonly_fields = ('shipping_address', 'billing_address', 'store_name', 'order_items_details')
+
+    def order_items_details(self, obj):
+        items = OrderItem.objects.filter(order=obj)
+        details = ""
+        for item in items:
+            details += f"Product: {item.product}, Quantity: {item.quantity}, Price: {item.price}, Price for Authenticated: {item.price_for_authenticated}\n"
+        return details
+
+    order_items_details.short_description = 'Order Items Details'
 
     def save_model(self, request, obj, form, change):
         if change and 'status' in form.changed_data:
