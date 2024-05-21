@@ -29,7 +29,7 @@ class ProductImageInline(admin.TabularInline):
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
-    readonly_fields = ['sold', 'rate']
+    readonly_fields = ['sold', 'rate', "images"]
     inlines = [ProductImageInline, ]
 
 
