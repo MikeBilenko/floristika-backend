@@ -15,8 +15,8 @@ from .models import (
 )
 
 
-class ProductAdmin(TranslationAdmin):
-    pass
+class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
+    readonly_fields = ['sold', 'rate']
 
 
 class ProductDescriptionAdmin(TranslationAdmin):
