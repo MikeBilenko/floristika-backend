@@ -7,7 +7,6 @@ from .models import (
     Shipping, 
     Billing, 
     BankDetails,
-    # OrderOrderItem,
 )
 from django import forms
 from django.core.mail import EmailMessage
@@ -29,10 +28,12 @@ class OrderItemInline(admin.TabularInline):
     
 
 class OrderAdmin(admin.ModelAdmin):
+    change_form_template = "admin/order/change_form.html"
+
     form = OrderAdminForm
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
-    readonly_fields = ('shipping_address', 'billing_address', 'store_name', )
+    readonly_fields = ('shipping_address', 'billing_address', 'store_name', "items")
     
 
     def save_model(self, request, obj, form, change):

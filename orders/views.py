@@ -1,15 +1,17 @@
 import datetime
 import os
+from .helpers import (
+    generate_numeric_order_number,
+    generate_invoice,
+)
 from rest_framework.permissions import AllowAny
-from django.template.loader import get_template
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from weasyprint import HTML
+from django.http import FileResponse
 from users.models import AddressBook, Company
 from .models import Order, Cart, Guest, OrderItem, Shipping, Billing,BankDetails
 from .serializers import OrderSerializer, CartSerializer
 from product.models import Product
-import random
 from rest_framework import status
 from discount.models import Discount
 from rest_framework.pagination import PageNumberPagination
@@ -81,10 +83,7 @@ class CartAPIView(APIView):
         return Response('Item deleted')
 
 
-def generate_numeric_order_number(length=8):
-    # Generate random order number using digits from the provided list
-    order_number = ''.join(random.choices(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], k=length))
-    return order_number
+
 
 
 class OrderAPIView(APIView):
@@ -148,8 +147,31 @@ class OrderAPIView(APIView):
 
             if len(self.request.data.get('discount')):
                 discount = Discount.objects.get(code=self.request.data.get('discount'))
+                
+           
+
+            company_total_auth = None
+            if company:
+                company_total_auth = total * company.sale_percent / 100
+
+            
+
+            order = Order.objects.create(
+                user=self.request.user,
+                company=company,
+                discount=discount,
+                total=total,
+                number=number,
+                shipping=shipping,
+                store=store,
+                billing=billing,
+                order_created=datetime.now(),
+                company_total_auth=company_total_auth,
+            )
+            order.save()
             for item in cartItems:
                 order_item = OrderItem.objects.create(
+                    order=order,
                     product=item.product,
                     quantity=item.quantity,
                     user=self.request.user,
@@ -167,110 +189,32 @@ class OrderAPIView(APIView):
                 total += price * item.quantity
                 cart_objs.append(order_item)
                 item.delete()
-
-            company_total_auth = None
-            if company:
-                company_total_auth = total * company.sale_percent / 100
-
-            order = Order.objects.create(
-                user=self.request.user,
-                company=company,
-                discount=discount,
-                total=total,
-                number=number,
-                shipping=shipping,
-                store=store,
-                billing=billing,
-                order_created=datetime.now(),
-                company_total_auth=company_total_auth,
-            )
+                
             for cart_obj in cart_objs:
+                cart_obj.order = order
+                cart_obj.save()
                 order.items.add(cart_obj)
             order.save()
             bank_details = BankDetails.objects.first()
 
-            new_items = []
-
-            for cart_item in cart_objs:
-                product = cart_item.product
-                name = product.name
-                price = product.price
-                sale = product.sale
-                sale_percent = product.sale
-                quantity = cart_item.quantity
-                auth_price = product.price_for_authenticated
-                sale_price = None
-                sale_auth_price = None
-                if product.sale:
-
-                    sale_auth_price = auth_price - (auth_price * sale_percent / 100)
-                    sale_price = price - (price * sale_percent / 100)
-
-                item_data = {
-                    'name': name,
-                    'price': price,
-                    'sale': sale,
-                    'sale_percent': sale_percent,
-                    'quantity': quantity,
-                    'auth_price': auth_price,
-                    'sale_price': sale_price,
-                    'sale_auth_price': sale_auth_price
-                }
-
-                new_items.append(item_data)
-
-            total = order.total
-            result = order.total
-            if order.discount:
-                discount = order.discount.discount
-                result -= total * discount / 100
-
-            if company_total_auth:
-                result -= float(company_total_auth)
-
-            context_data = {
-                "user": self.request.user,
-                "bank_details": bank_details,
-                "items": new_items,
-                "number": order.number,
-                "created_date": order.order_date,
-                "total": "{:.2f}".format(result + 3),
-                "discount": order.discount.discount if order.discount else 0,
-                "company": company.sale_percent if company else 0,
-                "billing": billing
-            }
-            template = get_template('orders/invoice.html')
-            html_content = template.render(context_data)
-
-            pdf_file = HTML(string=html_content).write_pdf()
-
-            directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", number)
-            os.makedirs(directory_path, exist_ok=True)
-            file_path = os.path.join(directory_path, f"invoice_{number}.pdf")
-            with open(file_path, 'wb') as f:
-                f.write(pdf_file)
-
-            order.invoice = file_path
-
-            url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
-            order.invoice_url = url
-            order.save()
+            
 
             email_body = (
                 'Dear Customer,\n\n'
                 'Thank you for your order. '
-                'Please make the payment and send the invoice to us so we can update your status.\n\n'
+                'We are processing your order and will get back to you with invoice soon.\n'
+                'Thanks for waiting! \n\n'
                 'Best regards,\n'
                 'Floristika'
             )
 
             email = EmailMessage(
-                subject=f"{number} Invoice Floristika",
+                subject=f"{number} Order Floristika",
                 body=email_body,
                 to=[self.request.user.email,],
                 from_email=settings.EMAIL_HOST_USER,
             )
-            email.attach_file(file_path)
+            # email.attach_file(file_path)
             email.send()
 
             serializer = OrderSerializer(order, many=False)
@@ -325,10 +269,24 @@ class OrderGuestAPIView(APIView):
         discount = None
         if len(self.request.data.get('discount')):
             discount = Discount.objects.get(code=self.request.data.get('discount'))
+        
+
+        order = Order.objects.create(
+            guest=guest,
+            discount=discount,
+            total=total,
+            number=number,
+            shipping=shipping,
+            store=store,
+            billing=billing,
+            order_created=datetime.now(),
+        )
+        order.save()
         for item in data.get('items'):
             product = Product.objects.get(slug=item['product'])
             quantity = int(item['quantity'])
             order_item = OrderItem.objects.create(
+                order=order,
                 product=product,
                 quantity=quantity,
                 guest=guest,
@@ -344,92 +302,27 @@ class OrderGuestAPIView(APIView):
                 price = product.price - (product.price * product.sale / 100)
             total += price * quantity
             cart_objs.append(order_item)
-
-        order = Order.objects.create(
-            guest=guest,
-            discount=discount,
-            total=total,
-            number=number,
-            shipping=shipping,
-            store=store,
-            billing=billing,
-            order_created=datetime.now(),
-        )
         for cart_obj in cart_objs:
             order.items.add(cart_obj)
         order.save()
-        bank_details = BankDetails.objects.first()
-        new_items = []
-
-        for cart_item in cart_objs:
-            product = cart_item.product
-            name = product.name
-            price = product.price
-            sale = product.sale
-            sale_percent = product.sale
-            quantity = cart_item.quantity
-            sale_price = None
-            if product.sale:
-                sale_price = price - (price * sale_percent / 100)
-
-            item_data = {
-                'name': name,
-                'price': price,
-                'sale': sale,
-                'sale_percent': sale_percent,
-                'quantity': quantity,
-                'sale_price': sale_price,
-            }
-
-            new_items.append(item_data)
-
-        total = order.total
-        result = order.total
-        if order.discount:
-            discount = order.discount.discount
-            result -= total * discount / 100
-
-        context_data = {
-            "user": self.request.user,
-            "bank_details": bank_details,
-            "items": new_items,
-            "number": order.number,
-            "created_date": order.order_date,
-            "total": "{:.2f}".format(result + 3),
-            "discount": order.discount.discount if order.discount else 0,
-            "billing": billing
-        }
-
-        template = get_template('orders/invoice.html')
-        html_content = template.render(context_data)
-
-        pdf_file = HTML(string=html_content).write_pdf()
-
-        directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", str(generate_numeric_order_number()))
-        os.makedirs(directory_path, exist_ok=True)
-        file_path = os.path.join(directory_path, f"invoice_{number}.pdf")
-        with open(file_path, 'wb') as f:
-            f.write(pdf_file)
-        order.invoice = file_path
-        url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
-        order.invoice_url = url
-        order.save()
+        
+        
 
         email_body = (
             'Dear Customer,\n\n'
             'Thank you for your order. '
-            'Please make the payment and send the invoice to us so we can update your status.\n\n'
+            'We are processing your order and will get back to you with invoice soon.\n'
+            'Thanks for waiting! \n\n'
             'Best regards,\n'
             'Floristika'
         )
 
         email = EmailMessage(
-            subject=f"{number} Invoice Floristika",
+            subject=f"{number} Order Floristika",
             body=email_body,
             to=[guest.email,],
             from_email=settings.EMAIL_HOST_USER,
         )
-        email.attach_file(file_path)
         email.send()
 
         serializer = OrderSerializer(order, many=False)
@@ -439,3 +332,47 @@ class OrderGuestAPIView(APIView):
         order = Order.objects.get(number=number)
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
+
+
+class OrderInvoiceAPIView(APIView):
+    """Ge4t Invoice Api View"""
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny, ]
+    
+    def get(self, request, pk):
+        order = Order.objects.get(id=pk)
+        user = None
+        bank_details = BankDetails.objects.first()
+        if order.user:
+            user = order.user
+        if order.guest:
+            user = order.guest
+        invoice = generate_invoice(
+            order=order,
+            user=user,
+            bank_details=bank_details,
+            billing=order.billing,
+            company=order.company,
+            cart_objs=order.items,
+            number=order.number,
+            company_total_auth=order.company_total_auth,
+        )
+        return FileResponse(open(invoice, "rb"), as_attachment=True)
+        
+        
+    def delete(self, request, pk):
+        order = Order.objects.get(id=pk)
+        directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", order.number)
+        os.makedirs(directory_path, exist_ok=True)
+        file_path = os.path.join(directory_path, f"invoice_{order.number}.pdf")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return Response(
+                {"message": "The file deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        else:
+            return Response(
+                {"message": "The file does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
