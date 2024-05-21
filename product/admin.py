@@ -15,22 +15,23 @@ from .models import (
     ProductImage,
 )
 
-class ImageInline(admin.TabularInline):
+class ProductImageInline(admin.TabularInline):
     model = Product.images.through
     extra = 1
     readonly_fields = ['image_preview']
-    fields = ['image_preview', 'image', 'alt']
+    fields = ['image', 'alt', 'image_preview']
 
     def image_preview(self, obj):
         if obj.pk:  # Check if the object exists (i.e., it's not a new unsaved instance)
-            return obj.productimage.image_preview()
+            product_image = ProductImage.objects.get(pk=obj.productimage_id)
+            return product_image.image_preview()
         return ""
     image_preview.short_description = 'Preview'
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
     readonly_fields = ['sold', 'rate']
-    inlines = [ImageInline, ]
+    inlines = [ProductImageInline, ]
 
 
 class ProductDescriptionAdmin(TranslationAdmin):
