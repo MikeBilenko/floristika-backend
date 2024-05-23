@@ -18,9 +18,11 @@ class SearchView(APIView):
             queryset = Product.objects.filter(
                 name__icontains=search) | Product.objects.filter(
                 name_lv__icontains=search) | Product.objects.filter(
-                name_ru__icontains=search)
+                name_ru__icontains=search) | Product.objects.filter(
+                vendor_code__icontains=search
+            )
             paginator = PageNumberPagination()
-            paginator.page_size = 1  # 16 Set the number of items per page
+            paginator.page_size = 15  # 16 Set the number of items per page
 
             result_page = paginator.paginate_queryset(queryset, request)
             serializer = ProductSerializer(result_page, many=True)

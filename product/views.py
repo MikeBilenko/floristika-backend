@@ -15,7 +15,7 @@ class ProductsHomePagination(pagination.PageNumberPagination):
 
 
 class ProductsPagination(pagination.PageNumberPagination):
-    page_size = 16
+    page_size = 15
     max_page_size = 1000
 
 
