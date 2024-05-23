@@ -32,7 +32,7 @@ class ProductListApiView(generics.ListAPIView):
             category = Category.objects.filter(slug=category_slug).first()
             queryset = queryset.filter(category=category)
 
-        subcategory_slug = self.request.query_params.get('subcategory')
+        subcategory_slug = self.request.query_params.get('type')
         if subcategory_slug:
             subcategory = SubCategory.objects.filter(slug=subcategory_slug).first()
             queryset = queryset.filter(subcategory=subcategory)
