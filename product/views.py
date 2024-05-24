@@ -49,8 +49,12 @@ class ProductListApiView(generics.ListAPIView):
                           sizes.split(',')]
             queryset = queryset.filter(size__in=Size.objects.filter(slug__in=size_slugs))
 
-        price_from = int(self.request.query_params.get('price_from'))
-        price_to = int(self.request.query_params.get('price_to'))
+        price_from = self.request.query_params.get('price_from')
+        if price_from:
+            price_from = float(price_from)
+        price_to = self.request.query_params.get('price_to')
+        if price_to:
+            price_to = float(price_to)
         if price_from and price_to:
             if bool(self.request.query_params.get("auth")):
                 queryset = queryset.filter(price_for_auth__range=(price_from, price_to))
