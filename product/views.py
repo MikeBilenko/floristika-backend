@@ -10,12 +10,12 @@ from filters.models import Size, Color
 
 
 class ProductsHomePagination(pagination.PageNumberPagination):
-    page_size = 6
+    page_size = 8
     max_page_size = 1000
 
 
 class ProductsPagination(pagination.PageNumberPagination):
-    page_size = 15
+    page_size = 16
     max_page_size = 1000
 
 
