@@ -57,17 +57,17 @@ class ProductListApiView(generics.ListAPIView):
             price_to = float(price_to)
         if price_from and price_to:
             if bool(self.request.query_params.get("auth")):
-                queryset = queryset.filter(price_for_auth__range=(price_from, price_to))
+                queryset = queryset.filter(price_for_authenticated__range=(price_from, price_to))
             else:
                 queryset = queryset.filter(price__range=(price_from, price_to))
         elif price_from and not price_to:
             if bool(self.request.query_params.get("auth")):
-                queryset = queryset.filter(price_for_auth__gte=price_from)
+                queryset = queryset.filter(price_for_authenticated__gte=price_from)
             else:
                 queryset = queryset.filter(price__gte=price_from)
         elif not price_from and price_to:
             if bool(self.request.query_params.get("auth")):
-                queryset = queryset.filter(price_for_auth__lte=price_to)
+                queryset = queryset.filter(price_for_authenticated__lte=price_to)
             else:
                 queryset = queryset.filter(price__lte=price_to)
 
@@ -88,12 +88,12 @@ class ProductListApiView(generics.ListAPIView):
             queryset = queryset.order_by('-created_at')
         elif sort_option == 'price_high_to_low':
             if bool(self.request.query_params.get("auth")):
-                queryset = queryset.order_by('-price_for_auth')
+                queryset = queryset.order_by('-price_for_authenticated')
             else:
                 queryset = queryset.order_by('-price')
         elif sort_option == 'price_low_to_high':
             if bool(self.request.query_params.get("auth")):
-                queryset = queryset.order_by('price_for_auth')
+                queryset = queryset.order_by('price_for_authenticated')
             else:
                 queryset = queryset.order_by('price')
         elif sort_option == 'discount':
