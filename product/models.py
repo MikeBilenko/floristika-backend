@@ -91,7 +91,6 @@ class Product(models.Model):
     images = models.ManyToManyField(
         ProductImage,
         related_name="product_images",
-        null=True,
         blank=True,
     )
     color = models.ForeignKey(Color,on_delete=models.DO_NOTHING, null=True, blank=True)
@@ -107,6 +106,11 @@ class Product(models.Model):
     delivery = models.ForeignKey(ProductDelivery, on_delete=models.DO_NOTHING, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     vendor_code = models.CharField(max_length=150)
+    vendor_code_public = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.name
