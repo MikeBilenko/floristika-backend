@@ -98,7 +98,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_related_products(self, obj):
         related_products = Product.objects.filter(
             Q(category=obj.category) & Q(subcategory=obj.subcategory)
-        ).exclude(pk=obj.pk)[:3]
+        ).exclude(pk=obj.pk)[:4]
 
         serializer = ProductSerializer(related_products, many=True)
         return serializer.data
