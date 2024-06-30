@@ -29,6 +29,7 @@ class ProductImageInline(admin.TabularInline):
 
 
 class ProductAdmin(TranslationAdmin, admin.ModelAdmin):
+    list_display = ('name', 'vendor_code', 'vendor_code_public')
     readonly_fields = ['sold', 'rate', "images"]
     inlines = [ProductImageInline, ]
 
