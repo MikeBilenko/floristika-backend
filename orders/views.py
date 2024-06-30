@@ -83,22 +83,20 @@ class CartAPIView(APIView):
         return Response('Item deleted')
 
 
-
-
-
 class OrderAPIView(APIView):
     serializer_class = OrderSerializer
     permission_classes = [AllowAny]
+
     def post(self, request):
         number = generate_numeric_order_number()
         if self.request.user:
+
             cartItems = Cart.objects.filter(user=self.request.user)
             cart_objs = []
             total = 0
-            total_auth = 0
             shipping = None
             store = None
-
+            delivery_price = 0.00
             company = None
             discount = None
 
@@ -147,20 +145,17 @@ class OrderAPIView(APIView):
 
             if len(self.request.data.get('discount')):
                 discount = Discount.objects.get(code=self.request.data.get('discount'))
-                
-           
 
             company_total_auth = None
             if company:
                 company_total_auth = total * company.sale_percent / 100
-
-            
 
             order = Order.objects.create(
                 user=self.request.user,
                 company=company,
                 discount=discount,
                 total=total,
+                delivery_price=delivery_price,
                 number=number,
                 shipping=shipping,
                 store=store,
@@ -183,7 +178,7 @@ class OrderAPIView(APIView):
                 product.qty -= item.quantity
                 product.sold += item.quantity
                 product.save()
-                price = item.product.price_for_authenticated
+                price = item.product.price
                 if item.product.sale:
                     price = price - (price * item.product.sale / 100)
                 total += price * item.quantity
@@ -194,10 +189,8 @@ class OrderAPIView(APIView):
                 cart_obj.order = order
                 cart_obj.save()
                 order.items.add(cart_obj)
+            order.total = total
             order.save()
-            bank_details = BankDetails.objects.first()
-
-            
 
             email_body = (
                 'Dear Customer,\n\n'
@@ -236,6 +229,7 @@ class OrderGuestAPIView(APIView):
         data = self.request.data
         shipping = None
         store = None
+        delivery_price = 0.00
         guest, _guest = Guest.objects.get_or_create(
             email=data['email'],
             first_name=data['name'],
@@ -269,7 +263,6 @@ class OrderGuestAPIView(APIView):
         discount = None
         if len(self.request.data.get('discount')):
             discount = Discount.objects.get(code=self.request.data.get('discount'))
-        
 
         order = Order.objects.create(
             guest=guest,
@@ -279,6 +272,7 @@ class OrderGuestAPIView(APIView):
             shipping=shipping,
             store=store,
             billing=billing,
+            delivery_price=delivery_price,
             order_created=datetime.now(),
         )
         order.save()
@@ -304,6 +298,7 @@ class OrderGuestAPIView(APIView):
             cart_objs.append(order_item)
         for cart_obj in cart_objs:
             order.items.add(cart_obj)
+        order.total = total
         order.save()
 
         email_body = (
@@ -425,3 +420,12 @@ class OrderInvoiceSendAPIView(APIView):
         email.send()
         os.remove(invoice)
         return Response(status=status.HTTP_200_OK)
+
+
+class GetOrderStatusTelegramAPIView(APIView):
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, number):
+        order = Order.objects.get(number=number)
+        status = order.status
+        return Response({"status": status})
