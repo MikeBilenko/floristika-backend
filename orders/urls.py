@@ -18,5 +18,5 @@ urlpatterns = [
     path('order/guest/<str:number>/', OrderGuestAPIView.as_view(), name='order_success_api_view'),
     path("order/get-invoice/<int:pk>/",OrderInvoiceAPIView.as_view(),  name="order_get_invoice_api_view"),
     path("order/send-invoice/<int:pk>/",OrderInvoiceSendAPIView.as_view(), name="order_send_invoice_api_view"),
-    path("order/telegram/get/<str:number>", GetOrderStatusTelegramAPIView.as_view(), name="telegram_get_api_view"),
+    path("order/telegram/get/<str:number>/", GetOrderStatusTelegramAPIView.as_view(), name="telegram_get_api_view"),
 ]
