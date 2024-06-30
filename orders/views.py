@@ -426,6 +426,9 @@ class GetOrderStatusTelegramAPIView(APIView):
     permission_classes = [AllowAny, ]
 
     def get(self, request, number):
-        order = Order.objects.get(number=number)
-        status = order.status
-        return Response({"status": status})
+        try:
+            order = Order.objects.get(number=number)
+            status = order.status
+            return Response({"status": status})
+        except:
+            return ValueError("No such order.")

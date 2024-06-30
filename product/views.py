@@ -2,6 +2,8 @@ from rest_framework import generics, pagination
 from .models import Product
 from .serializers import  ProductSerializer, ProductDetailSerializer
 from reviews.models import Review
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from reviews.serializers import ReviewSerializer
 from django.db.models import Q
@@ -130,12 +132,17 @@ class ProductDetailApiView(generics.RetrieveAPIView):
     lookup_field = "slug"
 
 
-class ProductVendorDetailApiView(generics.RetrieveAPIView):
+class ProductVendorDetailApiView(APIView):
     permission_classes = [AllowAny]
-    model = Product
     serializer_class = ProductDetailSerializer
-    queryset = Product.objects.all()
-    lookup_field = "vendor_code_public"
+
+    def get(self, request, vendor_code_public):
+        try:
+            product = Product.objects.filter(vendor_code_public)
+            serializer = ProductDetailSerializer(product, many=False)
+            return Response(serializer.data)
+        except:
+            return ValueError("No such product.")
 
 
 class ReviewPagination(pagination.PageNumberPagination):
