@@ -5,7 +5,8 @@ from .views import (
     ProductDetailApiView,
     ProductReviewsApiView,
     ProductNewListApiView,
-    ProductBestSellersListApiView
+    ProductBestSellersListApiView,
+    ProductVendorDetailApiView,
 )
 
 urlpatterns = [
@@ -14,5 +15,5 @@ urlpatterns = [
     path("best-sellers/", ProductBestSellersListApiView.as_view(), name="product_best_sellers_list_api_view"),
     path("<slug:slug>/", ProductDetailApiView.as_view(), name="product_detail_api_view"),
     path("<slug:slug>/reviews/", ProductReviewsApiView.as_view(), name="product_reviews_api"),
-
+    path("test/<str:vendor_code_public>/", ProductVendorDetailApiView.as_view(), name="product_detail_api_view"),
 ]

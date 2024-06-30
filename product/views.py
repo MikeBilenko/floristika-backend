@@ -130,6 +130,14 @@ class ProductDetailApiView(generics.RetrieveAPIView):
     lookup_field = "slug"
 
 
+class ProductVendorDetailApiView(generics.RetrieveAPIView):
+    permission_classes = [AllowAny]
+    model = Product
+    serializer_class = ProductDetailSerializer
+    queryset = Product.objects.all()
+    lookup_field = "vendor_code_public"
+
+
 class ReviewPagination(pagination.PageNumberPagination):
     page_size = 8
     max_page_size = 1000
