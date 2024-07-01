@@ -26,6 +26,7 @@ def generate_invoice(
         price = product.price
         sale = product.sale
         sale_percent = product.sale
+        vendor_code = product.vendor_code_public
         quantity = cart_item.quantity
         auth_price = product.price_for_authenticated
         sale_price = None
@@ -36,6 +37,7 @@ def generate_invoice(
             sale_price = price - (price * sale_percent / 100)
 
         item_data = {
+            "vendor_code_public": vendor_code,
             'name': name,
             'price': price,
             'sale': sale,
@@ -63,7 +65,7 @@ def generate_invoice(
         "items": new_items,
         "number": order.number,
         "created_date": order.order_date,
-        "total": "{:.2f}".format(result + 3),
+        "total": "{:.2f}".format(result),
         "discount": order.discount.discount if order.discount else 0,
         "company": company.sale_percent if company else 0,
         "billing": billing,

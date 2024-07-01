@@ -9,6 +9,7 @@ from reviews.serializers import ReviewSerializer
 from django.db.models import Q
 from category.models import Category, SubCategory
 from filters.models import Size, Color
+from rest_framework.status import HTTP_404_NOT_FOUND
 
 
 class ProductsHomePagination(pagination.PageNumberPagination):
@@ -142,7 +143,7 @@ class ProductVendorDetailApiView(APIView):
             serializer = ProductDetailSerializer(product, many=False)
             return Response(serializer.data)
         except:
-            return ValueError("No such product.")
+            return Response({"message": "No such product."}, status=HTTP_404_NOT_FOUND)
 
 
 class ReviewPagination(pagination.PageNumberPagination):

@@ -19,6 +19,7 @@ from datetime import datetime
 from store.models import Store
 from django.core.mail import EmailMessage
 from django.conf import settings
+from rest_framework.status import HTTP_404_NOT_FOUND
 
 
 class OrderListAPIView(APIView):
@@ -431,4 +432,4 @@ class GetOrderStatusTelegramAPIView(APIView):
             status = order.status
             return Response({"status": status})
         except:
-            return ValueError("No such order.")
+            return Response({"message": "No such order."}, status=HTTP_404_NOT_FOUND)
