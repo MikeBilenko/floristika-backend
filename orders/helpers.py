@@ -11,7 +11,6 @@ def generate_numeric_order_number(length=8):
 
 def generate_invoice(
     order,
-    guest,
     cart_objs,
     billing,
     company_total_auth,
@@ -28,12 +27,9 @@ def generate_invoice(
         sale_percent = product.sale
         vendor_code = product.vendor_code_public
         quantity = cart_item.quantity
-        auth_price = product.price_for_authenticated
+        # auth_price = product.price_for_authenticated
         sale_price = None
-        sale_auth_price = None
         if product.sale:
-
-            sale_auth_price = auth_price - (auth_price * sale_percent / 100)
             sale_price = price - (price * sale_percent / 100)
 
         item_data = {
@@ -43,24 +39,21 @@ def generate_invoice(
             'sale': sale,
             'sale_percent': sale_percent,
             'quantity': quantity,
-            'auth_price': auth_price,
             'sale_price': sale_price,
-            'sale_auth_price': sale_auth_price
         }
 
         new_items.append(item_data)
 
     total = order.total
-    result = order.total
+    result = float(order.total)
     if order.discount:
         discount = order.discount.discount
-        result -= total * discount / 100
+        result -= float(total) * float(discount) / 100
 
     if company_total_auth:
         result -= float(company_total_auth)
 
     context_data = {
-        "guest": guest,
         "bank_details": bank_details,
         "items": new_items,
         "number": order.number,
@@ -81,65 +74,32 @@ def generate_invoice(
     with open(file_path, 'wb') as f:
         f.write(pdf_file)
     return file_path
-    # order.invoice = file_path
 
-    # url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
-    # order.invoice_url = url
-    # order.save()
-    
 
-    # new_items = []
+def generate_invoice_delivery(
+    order,
+    billing,
+    bank_details,
+    number,
+    delivery_price
+):
 
-    #     for cart_item in cart_objs:
-    #         product = cart_item.product
-    #         name = product.name
-    #         price = product.price
-    #         sale = product.sale
-    #         sale_percent = product.sale
-    #         quantity = cart_item.quantity
-    #         sale_price = None
-    #         if product.sale:
-    #             sale_price = price - (price * sale_percent / 100)
+    context_data = {
+        "bank_details": bank_details,
+        "number": order.number,
+        "created_date": order.order_date,
+        "total": "{:.2f}".format(delivery_price),
+        "billing": billing,
+        "delivery": delivery_price,
+    }
+    template = get_template('orders/delivery_invoice.html')
+    html_content = template.render(context_data)
 
-    #         item_data = {
-    #             'name': name,
-    #             'price': price,
-    #             'sale': sale,
-    #             'sale_percent': sale_percent,
-    #             'quantity': quantity,
-    #             'sale_price': sale_price,
-    #         }
+    pdf_file = HTML(string=html_content).write_pdf()
 
-    #         new_items.append(item_data)
-
-    #     total = order.total
-    #     result = order.total
-    #     if order.discount:
-    #         discount = order.discount.discount
-    #         result -= total * discount / 100
-
-    #     context_data = {
-    #         "user": self.request.user,
-    #         "bank_details": bank_details,
-    #         "items": new_items,
-    #         "number": order.number,
-    #         "created_date": order.order_date,
-    #         "total": "{:.2f}".format(result + 3),
-    #         "discount": order.discount.discount if order.discount else 0,
-    #         "billing": billing
-    #     }
-
-    #     template = get_template('orders/invoice.html')
-    #     html_content = template.render(context_data)
-
-    #     pdf_file = HTML(string=html_content).write_pdf()
-
-    #     directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", str(generate_numeric_order_number()))
-    #     os.makedirs(directory_path, exist_ok=True)
-    #     file_path = os.path.join(directory_path, f"invoice_{number}.pdf")
-    #     with open(file_path, 'wb') as f:
-    #         f.write(pdf_file)
-    #     order.invoice = file_path
-    #     url = f"{settings.BASE_URL_PATH}{file_path.split('app')[1]}"
-    #     order.invoice_url = url
-    #     order.save()
+    directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", number)
+    os.makedirs(directory_path, exist_ok=True)
+    file_path = os.path.join(directory_path, f"delivery_invoice_{number}.pdf")
+    with open(file_path, 'wb') as f:
+        f.write(pdf_file)
+    return file_path

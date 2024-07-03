@@ -33,8 +33,11 @@ class OrderAdmin(admin.ModelAdmin):
     form = OrderAdminForm
     exclude = ("invoice",)
     inlines = [OrderItemInline,]
-    readonly_fields = ('shipping_address', 'billing_address', 'store_name', "items")
-    
+    readonly_fields = ('shipping_address', 'billing_address', 'store_name', "items", "number")
+
+    def has_add_permission(self, request):
+        return False
+
 
     def save_model(self, request, obj, form, change):
         if change and 'status' in form.changed_data:
@@ -109,14 +112,7 @@ class BankDetailsAdmin(admin.ModelAdmin):
 
 
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ("product", "price", "price_for_authenticated", "sale")
-    
-
-# class OrderOrderItemAdmin(admin.ModelAdmin):
-#     list_display = ['order', 'orderitem']
-
-# admin.site.register(OrderOrderItem, OrderOrderItemAdmin)
-
+    list_display = ("product", "price", "sale")
 
 
 admin.site.register(Order, OrderAdmin)

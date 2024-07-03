@@ -6,6 +6,8 @@ from .views import (
     OrderInvoiceAPIView,
     OrderInvoiceSendAPIView,
     GetOrderStatusTelegramAPIView,
+    DeliveryOrderInvoiceAPIView,
+    DeliveryOrderInvoiceSendAPIView,
 )
 from django.urls import path
 
@@ -19,4 +21,6 @@ urlpatterns = [
     path("order/get-invoice/<int:pk>/",OrderInvoiceAPIView.as_view(),  name="order_get_invoice_api_view"),
     path("order/send-invoice/<int:pk>/",OrderInvoiceSendAPIView.as_view(), name="order_send_invoice_api_view"),
     path("order/telegram/get/<str:number>/", GetOrderStatusTelegramAPIView.as_view(), name="telegram_get_api_view"),
+    path("order/get-invoice/delivery/<int:pk>/", DeliveryOrderInvoiceAPIView.as_view(), name="get_delivery_invoice"),
+    path("order/send-invoice/delivery/<int:pk>/", DeliveryOrderInvoiceSendAPIView.as_view(), name="delivery_invoice_send"),
 ]

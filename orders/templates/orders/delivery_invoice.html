@@ -153,33 +153,30 @@ footer {
             {{ billing.postal_code }}, {{ billing.phone }}
         </div>
       </span>
-
       <table>
         <thead>
           <tr>
             <th>Item</th>
-            <th>Vend Code</th>
             <th>Description</th>
             <th>Amount</th>
             <th>Price</th>
           </tr>
         </thead>
         <tbody>
-          {% for item in items %}
-            <tr>
-            <td>{{ forloop.counter }}.</td>
-              <td>{{ item.vendor_code_public }}</td>
-            <td>{{ item.name|upper }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>
-               {% if item.sale %}
-                  SALE -{{item.sale_percent}}% €{{ item.sale_price }}
-              {% else %}
-                  €{{ item.price }}
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
+        <tr>
+          <td>
+            1
+          </td>
+          <td>
+            Delivery Price
+          </td>
+          <td>
+            €{{ delivery }}
+          </td>
+          <td>
+              €{{ delivery }}
+          </td>
+        </tr>
         </tbody>
       </table>
       <div class="total">
@@ -190,18 +187,6 @@ footer {
           </div>
         </div>
       </div>
-      <div>
-          {% if company > 0 %}
-            <div>
-              With {{company}}% for company discount;
-            </div>
-          {% endif %}
-          {% if discount > 0 %}
-            <div>
-              With {{discount}}%  discount from code;
-            </div>
-          {% endif %}
-        </div>
       <div class="details">
         <b>Bank name: </b> {{ bank_details.bank_name }} <br />
         <b>Bank account: </b> {{ bank_details.iban }}

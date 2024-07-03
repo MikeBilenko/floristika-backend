@@ -3,6 +3,7 @@ import os
 from .helpers import (
     generate_numeric_order_number,
     generate_invoice,
+    generate_invoice_delivery
 )
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -197,6 +198,8 @@ class OrderAPIView(APIView):
                 'Dear Customer,\n\n'
                 'Thank you for your order. '
                 'We are processing your order and will get back to you with invoice soon.\n'
+                'We need to inform you that some items might missing in our stock.\n'
+                'Our manager will contact you soon.\n'
                 'Thanks for waiting! \n\n'
                 'Best regards,\n'
                 'Floristika'
@@ -306,6 +309,8 @@ class OrderGuestAPIView(APIView):
             'Dear Customer,\n\n'
             'Thank you for your order. '
             'We are processing your order and will get back to you with invoice soon.\n'
+            'We need to inform you that some items might missing in our stock.\n'
+            'Our manager will contact you soon.\n'
             'Thanks for waiting! \n\n'
             'Best regards,\n'
             'Floristika'
@@ -335,16 +340,10 @@ class OrderInvoiceAPIView(APIView):
     
     def get(self, request, pk):
         order = Order.objects.get(id=pk)
-        guest = False
         bank_details = BankDetails.objects.first()
-        if order.user:
-            guest = False
-        if order.guest:
-            guest = True
 
         invoice = generate_invoice(
             order=order,
-            guest=guest,
             bank_details=bank_details,
             billing=order.billing,
             company=order.company,
@@ -380,16 +379,10 @@ class OrderInvoiceSendAPIView(APIView):
 
     def get(self, request, pk):
         order = Order.objects.get(id=pk)
-        guest = False
         bank_details = BankDetails.objects.first()
-        if order.user:
-            guest = False
-        if order.guest:
-            guest = True
 
         invoice = generate_invoice(
             order=order,
-            guest=guest,
             bank_details=bank_details,
             billing=order.billing,
             company=order.company,
@@ -433,3 +426,82 @@ class GetOrderStatusTelegramAPIView(APIView):
             return Response({"status": status})
         except:
             return Response({"message": "No such order."}, status=HTTP_404_NOT_FOUND)
+
+
+class DeliveryOrderInvoiceAPIView(APIView):
+    """Get Delivery Invoice Api View"""
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, pk):
+        order = Order.objects.get(id=pk)
+        bank_details = BankDetails.objects.first()
+
+        invoice = generate_invoice_delivery(
+            order=order,
+            bank_details=bank_details,
+            billing=order.billing,
+            number=order.number,
+            delivery_price=order.delivery_price,
+        )
+
+        return FileResponse(open(invoice, "rb"), as_attachment=True)
+
+    def delete(self, request, pk):
+        order = Order.objects.get(id=pk)
+        directory_path = os.path.join(settings.MEDIA_ROOT, "invoices", order.number)
+        os.makedirs(directory_path, exist_ok=True)
+        file_path = os.path.join(directory_path, f"delivery_invoice_{order.number}.pdf")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return Response(
+                {"message": "The file deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        else:
+            return Response(
+                {"message": "The file does not exist"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class DeliveryOrderInvoiceSendAPIView(APIView):
+    """Send Invoice Api View"""
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny, ]
+
+    def get(self, request, pk):
+        order = Order.objects.get(id=pk)
+        bank_details = BankDetails.objects.first()
+
+        invoice = generate_invoice_delivery(
+            order=order,
+            bank_details=bank_details,
+            billing=order.billing,
+            number=order.number,
+            delivery_price=order.delivery_price,
+        )
+
+        email_body = (
+            'Dear Customer,\n\n'
+            'Thank you for your order. '
+            'Please pay for your order delivery.\n'
+            'Thanks! \n\n'
+            'Best regards,\n'
+            'Floristika'
+        )
+        if order.user:
+            email = order.user.email
+        else:
+            email = order.guest.email
+
+        email = EmailMessage(
+            subject=f"{order.number} Order Floristika",
+            body=email_body,
+            to=[email, ],
+            from_email=settings.EMAIL_HOST_USER,
+        )
+        email.attach_file(invoice)
+        email.send()
+        os.remove(invoice)
+        return Response(status=status.HTTP_200_OK)

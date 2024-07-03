@@ -16,6 +16,22 @@
       onclick="sendInvoice({{ original.id }});"
     />
   </div>
+<div class="submit-row">
+    {% if original.delivery_price %}
+  <input
+      value="Get Delivery Invoice"
+      type="button"
+      onclick="getDeliveryInvoice({{ original.id }}, {{ original.number }});"
+    />
+    <input
+      value="Send Delivery Invoice To Client"
+      type="button"
+      onclick="sendDeliveryInvoice({{ original.id }});"
+    />
+  {% else %}
+  <p>Add delivery price to get invoice.</p>
+  {% endif %}
+  </div>
   <script>
     function getInvoice(id, number = null) {
       const originalId = id;
@@ -63,6 +79,67 @@
 
     function sendInvoice(id) {
       fetch(`${window.location.origin}/api/v1/orders/order/send-invoice/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        alert("Invoice sent successfully");
+    })
+    .catch(error => console.error('Error:', error))
+    }
+
+
+    function getDeliveryInvoice(id, number = null) {
+      const originalId = id;
+    fetch(`${window.location.origin}/api/v1/orders/order/get-invoice/delivery/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `invoice_${number}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+    })
+    .catch(error => console.error('Error:', error))
+    .finally(() => {
+        fetch(`${window.location.origin}/api/v1/orders/order/get-invoice/delivery/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            console.log("Good");
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    }
+
+    function sendDeliveryInvoice(id) {
+      fetch(`${window.location.origin}/api/v1/orders/order/send-invoice/delivery/${id}/`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
