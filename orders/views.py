@@ -85,6 +85,17 @@ class CartAPIView(APIView):
         return Response('Item deleted')
 
 
+class OrderGetAPIView(APIView):
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        if self.request.user:
+            order = Order.objects.get(user=self.request.user, id=pk)
+            serializer = OrderSerializer(order, many=False)
+            return Response(serializer.data)
+
+
 class OrderAPIView(APIView):
     serializer_class = OrderSerializer
     permission_classes = [AllowAny]
@@ -217,11 +228,15 @@ class OrderAPIView(APIView):
             serializer = OrderSerializer(order, many=False)
             return Response(serializer.data)
 
-    def get(self, request, pk):
-        if self.request.user:
-            order = Order.objects.get(user=self.request.user, id=pk)
-            serializer = OrderSerializer(order, many=False)
-            return Response(serializer.data)
+
+class OrgerGuestGetAPIView(APIView):
+    serializer_class = OrderSerializer
+    permission_classes = [AllowAny]
+
+    def get(self, request, number):
+        order = Order.objects.get(number=number)
+        serializer = OrderSerializer(order, many=False)
+        return Response(serializer.data)
 
 
 class OrderGuestAPIView(APIView):
@@ -324,11 +339,6 @@ class OrderGuestAPIView(APIView):
         )
         email.send()
 
-        serializer = OrderSerializer(order, many=False)
-        return Response(serializer.data)
-
-    def get(self, request, number):
-        order = Order.objects.get(number=number)
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
 
