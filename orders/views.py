@@ -5,7 +5,7 @@ from .helpers import (
     generate_invoice,
     generate_invoice_delivery
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import FileResponse
@@ -91,9 +91,11 @@ class OrderGetAPIView(APIView):
 
     def get(self, request, pk):
         if self.request.user:
-            order = Order.objects.get(user=self.request.user, id=pk)
+            order = Order.objects.get(id=pk)
             serializer = OrderSerializer(order, many=False)
             return Response(serializer.data)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class OrderAPIView(APIView):
