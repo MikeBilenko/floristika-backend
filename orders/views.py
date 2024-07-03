@@ -186,7 +186,6 @@ class OrderAPIView(APIView):
                     quantity=item.quantity,
                     user=self.request.user,
                     price=item.product.price,
-                    price_for_authenticated=item.product.price_for_authenticated,
                     sale=item.product.sale,
                 )
                 product = Product.objects.get(pk=item.product.id)
@@ -306,7 +305,6 @@ class OrderGuestAPIView(APIView):
                 quantity=quantity,
                 guest=guest,
                 price=product.price,
-                price_for_authenticated=product.price_for_authenticated,
                 sale=product.sale,
             )
             product.qty -= quantity
